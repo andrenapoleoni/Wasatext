@@ -45,8 +45,8 @@ paths:
                 type: object
                 properties:
                   identifier:
-                    type: string
-                    example: "abcdef012345"
+                    type: integer
+                    example: 00012
 
   /user/{user_id}/username:
     parameters:
