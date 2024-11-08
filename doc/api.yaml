@@ -1,0 +1,325 @@
+openapi: 3.0.3
+info:
+  title: WasaText API
+  description: |-
+    This OpenAPI document describes the simplified login API.
+    Copy and paste the API from the `paths` key to your OpenAPI document.
+  version: "1"
+  
+tags:
+  - name: "Login"
+    description: "Everything about your session"
+  - name: "User"
+    description: "Everything about your user"  
+  
+paths:
+  /session:
+    post:
+      tags: [Login]
+      summary: Logs in the user
+      description: |-
+        If the user does not exist, it will be created,
+        and an identifier is returned.
+        If the user exists, the user identifier is returned.
+      operationId: doLogin
+      requestBody:
+        description: User details 
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: Maria
+                  pattern: 'ˆ.*?$'
+                  minLength: 3
+                  maxLength: 16
+        required: true
+      responses:
+        '201':
+          description: User log-in action successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  identifier:
+                    type: string
+                    example: "abcdef012345"
+
+  /user/{user_id}/username:
+    parameters:
+      - $ref: "#/components/parameters/userid"
+    put: 
+      operationId: setMyUserName
+      summary: Set Username
+      tags: [User]
+      description: Set name of the user
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: name to set
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Gianni"
+      responses:
+        "200":
+          description: User name changed
+        "400":
+          description: User already used
+
+  /user/{user_id}/conversation:
+    parameters:
+      - $ref: "#/components/parameters/userid" 
+    get:
+      security:
+        - bearerAuth: []  
+      tags: [User]
+      summary: Return list
+      description: |-
+        Return a list of conversation
+      operationId: getMyConversation 
+      responses:
+        "200": 
+          description: User conversations retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/conversationList"
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized error
+        "500":
+          description: Internal server error
+
+  /user/{user_id}/conversation/{chat_id}:
+    parameters:
+      - $ref: "#/components/parameters/userid"
+      - $ref: "#/components/parameters/chat"
+    get:
+      security:
+        - bearerAuth: []
+      tags: [User]
+      operationId: getConversation
+      responses:
+        "200":
+          description: Conversation retrieved by chat_id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/conversation"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /user/{user_id}/conversation/{chat_id}/messages:
+    parameters: 
+      - $ref: "#/components/parameters/userid"
+      - $ref: "#/components/parameters/chat"
+    post:
+      operationId: sendMessage
+      description: Send a message
+      security:
+        - bearerAuth: []
+      tags: [User]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/txtmsg"
+      responses:
+        "200":
+          description: Message sent
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /user/{user_id}/conversation/{chat_id}/messages/{message_id}:
+    parameters:
+      - name: user_id
+        in: path
+        schema: 
+          $ref: "#/components/schemas/UserId"
+        required: true
+      - name: chat_id
+        in: path
+        schema: 
+          $ref: "#/components/schemas/Chat_id"
+        required: true
+      - name: message_id
+        in: path
+        schema: 
+          $ref: "#/components/schemas/txtmsg_id"
+        required: true
+    post:
+      operationId: commentMessage
+      description: Comment on a single message
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/txtmsg"
+      responses:
+        "200": 
+          description: Replied successfully
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/txtmsg"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    get:
+      tags: [User]
+      operationId: forwardMessage
+      description: Return message to be forwarded
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Message copied
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/txtmsg"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    delete:
+      operationId: uncommentMessage
+      description: Delete a comment of a message
+      tags: [User]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Comment deleted
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+components:
+  securitySchemes:
+    bearerAuth: 
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  
+  parameters:
+    userid:
+      name: user_id
+      in: path
+      required: true
+      schema:
+        type: integer
+    chat:
+      name: chat_id
+      in: path
+      required: true
+      schema:
+        type: integer
+
+  responses:
+    UnauthorizedError:
+      description: Access token is missing or invalid
+    BadRequest:
+      description: Bad request
+    InternalServerError:
+      description: Internal server error   
+
+  schemas:
+    User: 
+      type: object
+      properties:
+        user_id:
+          $ref: "#/components/schemas/UserId"
+        username:
+          $ref: "#/components/schemas/Username"
+    
+    Username:
+      type: string
+      example: Maria
+      pattern: 'ˆ.*?$'
+      minLength: 3
+      maxLength: 16
+
+    UserId:
+      type: integer
+      minimum: 1
+      example: 110
+
+    Chat_id:
+      type: integer
+      minimum: 1
+      example: 1245
+
+    conversation:
+      type: object
+      properties: 
+        chat_id:
+          $ref: "#/components/schemas/Chat_id"
+        messagelist:
+          type: array
+          minItems: 0
+          maxItems: 10000000
+          items:
+            $ref: "#/components/schemas/txtmsg"
+          
+    conversationList:
+      type: array
+      minItems: 0
+      maxItems: 10000
+      items:
+        $ref: "#/components/schemas/conversation"
+    
+    txtmsg_id:
+      type: integer
+      minimum: 1
+      example: 23
+
+    txtmsg:
+      type: object
+      properties:
+        txt:
+          type: string
+          example: "Ciao sono Mario!"
+        date:
+          type: string
+          format: date-time
+          example: "2020-12-09T10:45:03Z"
+        id:
+          $ref: "#/components/schemas/txtmsg_id"
+        sender:
+          type: string
+          pattern: 'ˆ.*?$'
+          minLength: 3
+          maxLength: 16
+        receiver:
+          type: string
+          pattern: 'ˆ.*?$'
+          minLength: 3
+          maxLength: 16
