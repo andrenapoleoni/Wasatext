@@ -312,13 +312,19 @@ components:
       properties: 
         chat_id:
           $ref: "#/components/schemas/Chat_id"
+        userList:
+          type: array
+          minItems: 1
+          maxItems: 50  
         messagelist:
           type: array
           minItems: 0
           maxItems: 10000000
           items:
             $ref: "#/components/schemas/txtmsg"
-          
+        isGroup:
+          type: boolean
+
     conversationList:
       type: array
       minItems: 0
