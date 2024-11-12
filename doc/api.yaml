@@ -201,7 +201,7 @@ paths:
             schema:
               $ref: "#/components/schemas/txtmsg"
       responses:
-        "200": 
+        "201": 
           description: Replied successfully
           content:
             application/json:
