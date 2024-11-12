@@ -4,7 +4,7 @@ info:
   description: |-
     This OpenAPI document describes the simplified login API.
     Copy and paste the API from the `paths` key to your OpenAPI document.
-  version: "1"
+  version: "A"
   
 tags:
   - name: "Login"
