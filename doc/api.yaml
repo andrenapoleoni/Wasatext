@@ -11,6 +11,8 @@ tags:
     description: "Everything about your session"
   - name: "User"
     description: "Everything about your user"  
+  - name: "Group"
+    description: "Everything about Group"  
   
 paths:
   /session:
@@ -27,14 +29,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                  example: Maria
-                  pattern: 'ˆ.*?$'
-                  minLength: 3
-                  maxLength: 16
+              $ref: "#/components/schemas/Username"
         required: true
       responses:
         '201':
@@ -43,10 +38,57 @@ paths:
             application/json:
               schema:
                 type: object
+                description: an identifier
                 properties:
                   identifier:
+                    description: an identifier
                     type: integer
+                    minimum: 1
+                    maximum: 10000
                     example: 00012
+                example: {identifier: 10}
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"  
+        "500":
+          $ref: "#/components/responses/InternalServerError"         
+
+  /user:
+    parameters:
+      - name: username
+        description: username
+        in: query
+        required: true
+        schema:
+              $ref: "#/components/schemas/Username"
+    
+    get:
+      tags: [User] 
+      operationId: searchUsers
+      description: search an User 
+      summary: user can search another users 
+      security:
+        - bearerAuth: [] 
+      responses:
+        "200":
+          description: user find
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserList"
+                
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"  
+        "500":
+          $ref: "#/components/responses/InternalServerError" 
+
 
   /user/{user_id}/username:
     parameters:
@@ -63,16 +105,22 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                  example: "Gianni"
+              $ref: "#/components/schemas/Username"
       responses:
         "200":
           description: User name changed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
         "400":
-          description: User already used
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"  
+        "500":
+          $ref: "#/components/responses/InternalServerError" 
 
   /user/{user_id}/photo:
     parameters:
@@ -80,6 +128,7 @@ paths:
     put:
         operationId: setMyPhoto
         description: set new photo 
+        summary: user can set a new personal photo
         tags: [User]
         
         security:
@@ -87,15 +136,27 @@ paths:
 
         requestBody:
             content:
-                application/json:
+                multipart/form-data:
                     schema:
-                        $ref: "#/components/schemas/photo"
+                        $ref: "#/components/schemas/Photo"
          
         responses:
             "200":
                 description: photo changed
-                
-            
+                content:
+                  multipart/form-data:
+                    schema:
+                      $ref: "#/components/schemas/Photo"
+         
+            "400":
+              $ref: "#/components/responses/BadRequest"
+            "401":
+              $ref: "#/components/responses/UnauthorizedError"
+            "403":
+              $ref: "#/components/responses/ForbiddenError"  
+            "500":
+              $ref: "#/components/responses/InternalServerError"  
+  
                 
                         
                 
@@ -117,44 +178,84 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/conversationList"
+                $ref: "#/components/schemas/ConversationCollection"
         "400":
           $ref: "#/components/responses/BadRequest"
         "401":
           $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"  
+        "500":
+          $ref: "#/components/responses/InternalServerError" 
+    
+    post:
+      security:
+        - bearerAuth: []  
+      tags: [User]
+      summary: create a new chat
+      description: |-
+        create a new chat
+      operationId: createChat
+      requestBody:
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                id: 
+                  $ref: "#/components/schemas/Identifier"
+
+      responses:
+        "200": 
+          description: chat created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConversationCollection"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"  
         "500":
           $ref: "#/components/responses/InternalServerError"
-  
+
   /user/{user_id}/conversation/{chat_id}:
     parameters:
       - $ref: "#/components/parameters/userid"
-      - $ref: "#/components/parameters/chat"
+      - $ref: "#/components/parameters/chatid"
     get:
       security:
         - bearerAuth: []
       tags: [User]
       operationId: getConversation
+      description: get a specific conversation 
+      summary: return a single conveersation
       responses:
         "200":
           description: Conversation retrieved by chat_id
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/conversation"
+                $ref: "#/components/schemas/Conversation"
         "400":
           $ref: "#/components/responses/BadRequest"
         "401":
           $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"  
         "500":
-          $ref: "#/components/responses/InternalServerError"
+          $ref: "#/components/responses/InternalServerError" 
 
   /user/{user_id}/conversation/{chat_id}/messages:
     parameters: 
       - $ref: "#/components/parameters/userid"
-      - $ref: "#/components/parameters/chat"
+      - $ref: "#/components/parameters/chatid"
     post:
       operationId: sendMessage
       description: Send a message
+      summary: send a message
       security:
         - bearerAuth: []
       tags: [User]
@@ -162,101 +263,102 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/txtmsg"
+              $ref: "#/components/schemas/Messages"
       responses:
         "200":
           description: Message sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Messages"
         "400":
           $ref: "#/components/responses/BadRequest"
         "401":
           $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"  
         "500":
-          $ref: "#/components/responses/InternalServerError"
+          $ref: "#/components/responses/InternalServerError" 
 
   /user/{user_id}/conversation/{chat_id}/messages/{message_id}/comments:
     parameters:
-      - name: user_id
-        in: path
-        schema: 
-          $ref: "#/components/schemas/UserId"
-        required: true
-      - name: chat_id
-        in: path
-        schema: 
-          $ref: "#/components/schemas/Chat_id"
-        required: true
-      - name: message_id
-        in: path
-        schema: 
-          $ref: "#/components/schemas/txtmsg_id"
-        required: true
-    
+      - $ref: "#/components/parameters/userid"
+      - $ref: "#/components/parameters/chatid"
+      - $ref: "#/components/parameters/messageid"
+
     post:
       operationId: commentMessage
       description: Comment on a single message
+      summary: comment a single message with reaction
+      tags: [User]
       security:
         - bearerAuth: []
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/messages"
+              type: object
+              description: Reaction 
+              properties:
+                reaction:
+                  $ref: "#/components/schemas/Reaction"
       responses:
         "201": 
           description: Replied successfully
           content:
             application/json:
               schema: 
-                $ref: "#/components/schemas/messages"
+                $ref: "#/components/schemas/Reaction"
         "400":
           $ref: "#/components/responses/BadRequest"
         "401":
           $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"  
         "500":
-          $ref: "#/components/responses/InternalServerError"
-
+          $ref: "#/components/responses/InternalServerError" 
     delete:
       operationId: uncommentMessage
       description: Delete a comment of a message
+      summary: delete a comment of a message
       tags: [User]
       security:
         - bearerAuth: []
       responses:
         "200":
           description: Comment deleted
+          content: 
+            text/plain:
+              schema: 
+                description: comment deleted
+                type: string
+                minLength: 5
+                maxLength: 100
+                example: "comment deleted  correctly"
+
         "400":
           $ref: "#/components/responses/BadRequest"
         "401":
           $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"  
         "500":
-          $ref: "#/components/responses/InternalServerError"        
+          $ref: "#/components/responses/InternalServerError"       
   
   /user/{user_id}/conversation/{chat_id}/messages/{message_id}:        
     parameters:
-      - name: user_id
-        in: path
-        schema: 
-          $ref: "#/components/schemas/UserId"
-        required: true
-      - name: chat_id
-        in: path
-        schema: 
-          $ref: "#/components/schemas/Chat_id"
-        required: true
-      - name: message_id
-        in: path
-        schema: 
-          $ref: "#/components/schemas/txtmsg_id"
-        required: true
-  
+      - $ref: "#/components/parameters/userid"
+      - $ref: "#/components/parameters/chatid"
+      - $ref: "#/components/parameters/messageid"
   
     post:
       parameters:
         - name: chat_id
+          description: chat id
           in: query
           required: true
           schema:
-            $ref: "#/components/schemas/chat_id"
+            $ref: "#/components/schemas/Identifier"
 
       tags: [User]
       operationId: forwardMessage
@@ -266,43 +368,173 @@ paths:
       responses:
         "200":
           description: Message forwarded
-         
+          content: 
+            text/plain:
+              schema: 
+                description: message forwarded
+                type: string
+                minLength: 5
+                maxLength: 100
+                example: "message forwarded"
         "400":
           $ref: "#/components/responses/BadRequest"
         "401":
           $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"  
         "500":
-          $ref: "#/components/responses/InternalServerError"
-  
+          $ref: "#/components/responses/InternalServerError" 
     delete:
       operationId: deleteMessage
       description: Delete a message of a chat
+      summary: an User can delete a specific message
       tags: [User]
       security:
         - bearerAuth: []
       responses:
         "200":
           description: message deleted
+          content: 
+            text/plain:
+              schema: 
+                description: message deleted
+                type: string
+                minLength: 5
+                maxLength: 100
+                example: "message deleted  correctly"
         "400":
           $ref: "#/components/responses/BadRequest"
         "401":
           $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"  
         "500":
-          $ref: "#/components/responses/InternalServerError"   
+          $ref: "#/components/responses/InternalServerError" 
   
-  /user/{user_id}/groups:
+  /user/{user_id}/groups/{group_id}:
     parameters:
-      - name: user_id
-        in: path
-        required: true
-        schema:
-          $ref: "#/components/schemas/UserId"
-    put: 
+      - $ref: "#/components/parameters/userid"
+      - $ref: "#/components/parameters/groupid"
+
+    post: 
+      tags: [Group]
       operationId: addToGroup
-      #da completare
+      description: add an User in a group 
+      summary: an user can add another user in a group
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: users list
+              properties:
+                name:
+                  type: array
+                  description: id
+                  minItems: 1
+                  maxItems: 100000
+                  items:
+                    $ref: "#/components/schemas/Identifier"
+
       responses:
         "200":
           description: OK
+          content: 
+            text/plain:
+              schema: 
+                description: Ok
+                type: string
+                minLength: 5
+                maxLength: 100
+                example: "User add to group correctly"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"  
+        "500":
+          $ref: "#/components/responses/InternalServerError"   
+
+    delete:
+      tags: [Group]
+      operationId: leaveGroup
+      description: leave a group
+      summary: an user can leave a group
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content: 
+            text/plain:
+              schema: 
+                description: Ok
+                type: string
+                minLength: 5
+                maxLength: 100
+                example: "User delete to group correctly"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"  
+        "500":
+          $ref: "#/components/responses/InternalServerError" 
+
+
+  /user/{user_id}/groups:
+    parameters:
+      - $ref: "#/components/parameters/userid"
+      
+    post: 
+      security:
+        - bearerAuth: []
+      operationId: createGroup
+      tags: [Group]
+      description: create a group
+      summary: an user can create a new group
+      requestBody:
+        content: 
+          application/json:
+            schema:
+              type: object
+              description: group data
+              properties:
+                name:
+                  type: string
+                  description: group name
+                  pattern: '^.*?$'
+                  minLength: 1
+                  maxLength: 10000
+                list:
+                  type: array
+                  description: list of users
+                  minItems: 1
+                  maxItems: 40  
+
+      responses:
+        "200": 
+          description: Group created
+          content: 
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/Group"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"  
+        "500":
+          $ref: "#/components/responses/InternalServerError"  
+
+
+
+
+  
+
 
 
 components:
@@ -314,141 +546,264 @@ components:
   
   parameters:
     userid:
+      description: userID
       name: user_id
       in: path
       required: true
       schema:
-        type: integer
-    chat:
+        $ref: "#/components/schemas/Identifier"
+    chatid:
+      description: chat id
       name: chat_id
       in: path
       required: true
       schema:
-        type: integer
+        $ref: "#/components/schemas/Identifier"
+    messageid:
+      description: messageid
+      name: message_id
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/Identifier"
+    groupid:
+      description: group id
+      name: group_id
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/Identifier"
 
+
+
+        
   responses:
     UnauthorizedError:
       description: Access token is missing or invalid
+      content: 
+        text/plain:
+          schema: 
+            description: Unauthorized error
+            type: string
+            pattern: '^.*?$'
+            example: "Unathorized Error"
+            minLength: 12
+            maxLength: 30
+    
     BadRequest:
       description: Bad request
+      content: 
+        text/plain:
+          schema: 
+            description: Bad request
+            type: string
+            pattern: '^.*?$'
+            example: "bad request"
+            minLength: 11
+            maxLength: 30
+    
+    ForbiddenError:
+      description: User is not allowed to perform action 
+      content: 
+        text/plain:
+          schema: 
+            description: forbidden error
+            type: string
+            pattern: '^.*?$'
+            example: "Forbuidden Error"
+            minLength: 9
+            maxLength: 30 
+    
     InternalServerError:
-      description: Internal server error   
+      description: Internal server error
+      content: 
+        text/plain:
+          schema: 
+            description: Internal server error
+            type: string
+            pattern: '^.*?$'
+            example: "Internal server Error"
+            minLength: 21
+            maxLength: 30  
 
   schemas:
     User: 
       type: object
+      description: user object
       properties:
         user_id:
-          $ref: "#/components/schemas/UserId"
+          $ref: "#/components/schemas/Identifier"
         username:
           $ref: "#/components/schemas/Username"
         photo:
-            $ref: "#/components/schemas/photo"
+            $ref: "#/components/schemas/Photo"
     
     Username:
-      type: string
-      example: Maria
-      pattern: 'ˆ.*?$'
-      minLength: 3
-      maxLength: 16
-
-    UserId:
-      type: integer
-      minimum: 1
-      example: 110
-
-    Chat_id:
-      type: integer
-      minimum: 1
-      example: 1245
-    
-    conversationGroup:
       type: object
+      description: object user
+      
       properties:
-        userList:
+        username:
+          type: string
+          description: string username
+          example: Maria
+          pattern: '^.*?$'
+          minLength: 3
+          maxLength: 16
+
+    Identifier:
+      type: integer
+      description: identifier
+      minimum: 1
+      maximum: 100000
+      example: 110
+  
+    ConversationGroup:
+      type: object
+      description: group chat
+      properties:
+        group_id:
+          $ref: "#/components/schemas/Identifier"
+        
+        chat_id:
+          $ref: "#/components/schemas/Identifier"      
+      
+    
+    Group: 
+      type: object
+      description: group
+      properties:
+        group_id:
+          $ref: "#/components/schemas/Identifier"
+        photogroup:
+            $ref: "#/components/schemas/Photo" 
+        userlist:
           type: array
+          description: user list
           minItems: 1
           maxItems: 50
           items:
-            $ref: "#/components/schemas/User"
-        photogroup:
-          type: object
-          items: 
-            $ref: "#/components/schemas/photo" 
-        chat_id:
-          $ref: "#/components/schemas/Chat_id"      
-      
+            $ref: "#/components/schemas/User" 
+      required: 
+        - userlist           
 
-    conversationPrivate:
+    ConversationPrivate:
       type: object
+      description: private chat
       properties:
         chat_id:
-          $ref: "#/components/schemas/Chat_id"
-        User:
+          $ref: "#/components/schemas/Identifier"
+        user:
           $ref: "#/components/schemas/User" 
 
         
 
-    conversation:
+    Conversation:
       oneOf:
-        - $ref: "#/components/schemas/conversationPrivate"
-        - $ref: "#/components/schemas/conversationGroup"
+        - $ref: "#/components/schemas/ConversationPrivate"
+        - $ref: "#/components/schemas/ConversationGroup"
       
         
-
-    conversationList:
-      type: array
-      minItems: 0
-      maxItems: 10000
-      items:
-        $ref: "#/components/schemas/conversation"
+    UserList:
+      type: object
+      description: lista user
+      properties:
+        list:
+          type: array
+          description: array of username
+          minItems: 0
+          maxItems: 100000
+          items:
+            $ref: "#/components/schemas/Username"
+      required: 
+        - list  
+    ConversationCollection:
+      type: object
+      description: list of conversation
+      properties:
+        conversation:
+          type: array
+          description: list of conversation
+          minItems: 0
+          maxItems: 10000
+          items:
+            $ref: "#/components/schemas/Conversation"
+      required: 
+        - conversation
     
-    messages: 
-      oneOf:
-        - $ref: "#/components/schemas/txtmsg"
-        - $ref: "#/components/schemas/photomsg"
+    Messages: 
+      description: message schema
+      anyOf:
+        - $ref: "#/components/schemas/Txtmsg"
+        - $ref: "#/components/schemas/Photomsg"
       
-    photomsg:
+    Photomsg:
       type: object
       properties:
         id: 
           type: integer
+          description: id
           minimum: 1
+          maximum: 100000
         
         photo:
-          $ref: "#/components/schemas/photo"
+          $ref: "#/components/schemas/Photo"
 
 
-    txtmsg_id:
-      type: integer
-      minimum: 1
-      example: 23
+   
 
-    txtmsg:
+    Txtmsg:
       type: object
       properties:
         txt:
           type: string
+          description: text 
+          pattern: '^.*?$'
           example: "Ciao sono Mario!"
+          minLength: 1
+          maxLength: 100000
         date:
           type: string
+          description: date time
           format: date-time
           example: "2020-12-09T10:45:03Z"
+          minLength: 1
+          maxLength: 100000
         id:
-          $ref: "#/components/schemas/txtmsg_id"
+          $ref: "#/components/schemas/Identifier"
         sender:
+          description: sender
           type: string
-          pattern: 'ˆ.*?$'
+          pattern: '^.*?$'
           minLength: 3
           maxLength: 16
         receiver:
           type: string
-          pattern: 'ˆ.*?$'
+          description: receiver
+          pattern: '^.*?$'
           minLength: 3
           maxLength: 16
     
-    photo:
+    Photo:
         type: string
+        description: foto
         format: byte
         minLength: 1
         maxLength: 1000000000      
+
+    Reaction:
+      type: object
+      description: reaction 
+      properties:
+        emoticon:
+          type: string
+          description: emoticon
+          pattern: '^.*?$'
+          minLength: 1
+          maxLength: 2
+        id:
+          description: id
+          type: integer
+          
+          minimum: 1
+          maximum: 10000000
