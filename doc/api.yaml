@@ -32,21 +32,18 @@ paths:
               $ref: "#/components/schemas/Username"
         required: true
       responses:
-        '201':
-          description: User log-in action successful
+        "200":
+          description: Succesfully logged in
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Identifier"}
+        "201":
+          description: Account created
           content:
             application/json:
               schema:
-                type: object
-                description: an identifier
-                properties:
-                  identifier:
-                    description: an identifier
-                    type: integer
-                    minimum: 1
-                    maximum: 10000
-                    example: 00012
-                example: {identifier: 10}
+                $ref: "#/components/schemas/Identifier"
+                
         "400":
           $ref: "#/components/responses/BadRequest"
         "401":
@@ -58,8 +55,8 @@ paths:
 
   /user:
     parameters:
-      - name: username
-        description: username
+      - name:   searched_username
+        description: username to search
         in: query
         required: true
         schema:
@@ -79,7 +76,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserList"
-                
+            
         "400":
           $ref: "#/components/responses/BadRequest"
         "401":
@@ -130,16 +127,13 @@ paths:
         description: set new photo 
         summary: user can set a new personal photo
         tags: [User]
-        
         security:
         - bearerAuth: []
-
         requestBody:
             content:
                 multipart/form-data:
                     schema:
-                        $ref: "#/components/schemas/Photo"
-         
+                        $ref: "#/components/schemas/Photo" 
         responses:
             "200":
                 description: photo changed
@@ -147,7 +141,6 @@ paths:
                   multipart/form-data:
                     schema:
                       $ref: "#/components/schemas/Photo"
-         
             "400":
               $ref: "#/components/responses/BadRequest"
             "401":
@@ -201,12 +194,13 @@ paths:
           application/json:
             schema:
               type: object
+              description: chat id
               properties:
                 id: 
                   $ref: "#/components/schemas/Identifier"
 
       responses:
-        "200": 
+        "201": 
           description: chat created
           content:
             application/json:
@@ -265,7 +259,7 @@ paths:
             schema:
               $ref: "#/components/schemas/Messages"
       responses:
-        "200":
+        "201":
           description: Message sent
           content:
             application/json:
@@ -297,11 +291,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              description: Reaction 
-              properties:
-                reaction:
-                  $ref: "#/components/schemas/Reaction"
+              $ref: "#/components/schemas/Reaction"
       responses:
         "201": 
           description: Replied successfully
@@ -332,6 +322,7 @@ paths:
               schema: 
                 description: comment deleted
                 type: string
+                pattern: '^.*?$'
                 minLength: 5
                 maxLength: 100
                 example: "comment deleted  correctly"
@@ -353,8 +344,8 @@ paths:
   
     post:
       parameters:
-        - name: chat_id
-          description: chat id
+        - name: dest_id
+          description: receiver id
           in: query
           required: true
           schema:
@@ -363,6 +354,7 @@ paths:
       tags: [User]
       operationId: forwardMessage
       description: forward a message throw another chat
+      summary: an User can forward a message froma chat to another
       security:
         - bearerAuth: []
       responses:
@@ -373,6 +365,7 @@ paths:
               schema: 
                 description: message forwarded
                 type: string
+                pattern: '^.*?$'
                 minLength: 5
                 maxLength: 100
                 example: "message forwarded"
@@ -421,21 +414,14 @@ paths:
       operationId: addToGroup
       description: add an User in a group 
       summary: an user can add another user in a group
+      security:
+        - bearerAuth: []
       requestBody:
         content:
           application/json:
             schema:
-              type: object
-              description: users list
-              properties:
-                name:
-                  type: array
-                  description: id
-                  minItems: 1
-                  maxItems: 100000
-                  items:
-                    $ref: "#/components/schemas/Identifier"
-
+                $ref: "#/components/schemas/UserList"
+        required: true
       responses:
         "200":
           description: OK
@@ -444,6 +430,7 @@ paths:
               schema: 
                 description: Ok
                 type: string
+                pattern: '^.*?$'
                 minLength: 5
                 maxLength: 100
                 example: "User add to group correctly"
@@ -471,6 +458,7 @@ paths:
               schema: 
                 description: Ok
                 type: string
+                pattern: '^.*?$' 
                 minLength: 5
                 maxLength: 100
                 example: "User delete to group correctly"
@@ -482,6 +470,94 @@ paths:
           $ref: "#/components/responses/ForbiddenError"  
         "500":
           $ref: "#/components/responses/InternalServerError" 
+
+  /user/{user_id}/groups/{group_id}/groupname:
+    parameters:
+      - $ref: "#/components/parameters/userid"
+      - $ref: "#/components/parameters/groupid"
+    
+    put:
+      tags: [Group]
+      operationId: setGroupName
+      security:
+        - bearerAuth: []
+      summary: set name of a group
+      description: change name of a group
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type : object
+              properties:
+                name:
+                  $ref: "#/components/schemas/Name"
+        required: true
+      responses:
+        "200": 
+          description: name setted
+          content: 
+            text/plain:
+              schema: 
+                description: Ok
+                type: string
+                pattern: '^.*?$' 
+                minLength: 5
+                maxLength: 100
+                example: "group name setted correctly"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"  
+        "500":
+          $ref: "#/components/responses/InternalServerError"         
+  
+  /user/{user_id}/groups/{group_id}/groupphoto:
+    parameters:
+      - $ref: "#/components/parameters/userid"
+      - $ref: "#/components/parameters/groupid"
+    
+    put:
+      tags: [Group]
+      operationId: setGroupPhoto
+      security:
+        - bearerAuth: []
+      summary: set photo of a group
+      description: change photo of a group
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/Photo"
+        required: true
+      responses:
+        "200": 
+          description: photo setted
+          content: 
+            text/plain:
+              schema: 
+                description: Ok
+                type: string
+                pattern: '^.*?$' 
+                minLength: 5
+                maxLength: 100
+                example: "group photo setted correctly"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"  
+        "500":
+          $ref: "#/components/responses/InternalServerError" 
+          
+          
+
+
+
+
+
 
 
   /user/{user_id}/groups:
@@ -512,10 +588,12 @@ paths:
                   type: array
                   description: list of users
                   minItems: 1
-                  maxItems: 40  
+                  maxItems: 40
+                  items: 
+                    $ref: "#/components/schemas/User"
 
       responses:
-        "200": 
+        "201": 
           description: Group created
           content: 
             application/json:
@@ -543,7 +621,7 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-  
+   
   parameters:
     userid:
       description: userID
@@ -699,6 +777,7 @@ components:
         
 
     Conversation:
+      description: Schema of conversation
       oneOf:
         - $ref: "#/components/schemas/ConversationPrivate"
         - $ref: "#/components/schemas/ConversationGroup"
@@ -710,11 +789,11 @@ components:
       properties:
         list:
           type: array
-          description: array of username
+          description: array of user
           minItems: 0
           maxItems: 100000
           items:
-            $ref: "#/components/schemas/Username"
+            $ref: "#/components/schemas/User"
       required: 
         - list  
     ConversationCollection:
@@ -739,6 +818,7 @@ components:
       
     Photomsg:
       type: object
+      description: photo message
       properties:
         id: 
           type: integer
@@ -749,11 +829,19 @@ components:
         photo:
           $ref: "#/components/schemas/Photo"
 
+    Name: 
+      type: string
+      description: string name
+      pattern: '^.*?$'
+      example: "Giallo"
+      minLength: 1
+      maxLength: 100000
 
    
 
     Txtmsg:
       type: object
+      description: text message
       properties:
         txt:
           type: string
@@ -802,8 +890,4 @@ components:
           minLength: 1
           maxLength: 2
         id:
-          description: id
-          type: integer
-          
-          minimum: 1
-          maximum: 10000000
+          $ref : "#/components/schemas/Identifier"
