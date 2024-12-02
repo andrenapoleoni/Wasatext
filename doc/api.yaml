@@ -180,8 +180,12 @@ paths:
           $ref: "#/components/responses/ForbiddenError"  
         "500":
           $ref: "#/components/responses/InternalServerError" 
-    
-    post:
+  
+  /user/{user_id}/conversation/{dest_id}: 
+    parameters:
+      - $ref: "#/components/parameters/userid"
+      - $ref: "#/components/parameters/id"
+    put:
       security:
         - bearerAuth: []  
       tags: [User]
@@ -194,10 +198,10 @@ paths:
           application/json:
             schema:
               type: object
-              description: chat id
+              description: message
               properties:
-                id: 
-                  $ref: "#/components/schemas/Identifier"
+                msgid: 
+                  $ref: "#/components/schemas/Messages"
 
       responses:
         "201": 
@@ -205,7 +209,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ConversationCollection"
+                $ref: "#/components/schemas/Conversation"
         "400":
           $ref: "#/components/responses/BadRequest"
         "401":
@@ -215,10 +219,6 @@ paths:
         "500":
           $ref: "#/components/responses/InternalServerError"
 
-  /user/{user_id}/conversation/{chat_id}:
-    parameters:
-      - $ref: "#/components/parameters/userid"
-      - $ref: "#/components/parameters/chatid"
     get:
       security:
         - bearerAuth: []
@@ -392,6 +392,7 @@ paths:
               schema: 
                 description: message deleted
                 type: string
+                pattern: '^.*?$'
                 minLength: 5
                 maxLength: 100
                 example: "message deleted  correctly"
@@ -487,6 +488,7 @@ paths:
         content:
           application/json:
             schema:
+              description: Name of a group 
               type : object
               properties:
                 name:
@@ -647,6 +649,13 @@ components:
     groupid:
       description: group id
       name: group_id
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/Identifier"
+    id:
+      description: identifier
+      name: dest_id
       in: path
       required: true
       schema:
