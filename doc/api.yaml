@@ -164,7 +164,7 @@ paths:
       summary: Return list
       description: |-
         Return a list of conversation
-      operationId: getMyConversation 
+      operationId: getMyConversations 
       responses:
         "200": 
           description: User conversations retrieved successfully
@@ -184,7 +184,7 @@ paths:
   /user/{user_id}/conversation/{dest_id}: 
     parameters:
       - $ref: "#/components/parameters/userid"
-      - $ref: "#/components/parameters/id"
+      - $ref: "#/components/parameters/destid"
     put:
       security:
         - bearerAuth: []  
@@ -580,7 +580,7 @@ paths:
               type: object
               description: group data
               properties:
-                name:
+                groupname:
                   type: string
                   description: group name
                   pattern: '^.*?$'
@@ -653,7 +653,7 @@ components:
       required: true
       schema:
         $ref: "#/components/schemas/Identifier"
-    id:
+    destid:
       description: identifier
       name: dest_id
       in: path
@@ -731,12 +731,7 @@ components:
       
       properties:
         username:
-          type: string
-          description: string username
-          example: Maria
-          pattern: '^.*?$'
-          minLength: 3
-          maxLength: 16
+          $ref: "#/components/schemas/Username"
 
     Identifier:
       type: integer
@@ -796,7 +791,7 @@ components:
       type: object
       description: lista user
       properties:
-        list:
+        listuser:
           type: array
           description: array of user
           minItems: 0
@@ -804,7 +799,7 @@ components:
           items:
             $ref: "#/components/schemas/User"
       required: 
-        - list  
+        - listuser   
     ConversationCollection:
       type: object
       description: list of conversation
@@ -830,10 +825,7 @@ components:
       description: photo message
       properties:
         id: 
-          type: integer
-          description: id
-          minimum: 1
-          maximum: 100000
+          $ref: "#/components/schemas/Identifier"
         
         photo:
           $ref: "#/components/schemas/Photo"
