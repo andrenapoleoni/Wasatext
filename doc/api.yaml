@@ -722,7 +722,7 @@ components:
           $ref: "#/components/schemas/Identifier"
         username:
           $ref: "#/components/schemas/Username"
-        photo:
+        photouser:
             $ref: "#/components/schemas/Photo"
     
     Username:
@@ -730,8 +730,13 @@ components:
       description: object user
       
       properties:
-        username:
-          $ref: "#/components/schemas/Username"
+        syntaxname:
+          type: string
+          description: username
+          pattern: '^.*?$'
+          example: "Mario"
+          minLength: 3
+          maxLength: 16
 
     Identifier:
       type: integer
@@ -755,7 +760,7 @@ components:
       type: object
       description: group
       properties:
-        group_id:
+        groupid:
           $ref: "#/components/schemas/Identifier"
         photogroup:
             $ref: "#/components/schemas/Photo" 
@@ -773,7 +778,7 @@ components:
       type: object
       description: private chat
       properties:
-        chat_id:
+        chatid:
           $ref: "#/components/schemas/Identifier"
         user:
           $ref: "#/components/schemas/User" 
@@ -824,7 +829,7 @@ components:
       type: object
       description: photo message
       properties:
-        id: 
+        photoid: 
           $ref: "#/components/schemas/Identifier"
         
         photo:
