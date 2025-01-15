@@ -280,7 +280,7 @@ paths:
       - $ref: "#/components/parameters/chatid"
       - $ref: "#/components/parameters/messageid"
 
-    post:
+    put:
       operationId: commentMessage
       description: Comment on a single message
       summary: comment a single message with reaction

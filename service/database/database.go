@@ -41,6 +41,62 @@ type AppDatabase interface {
 	GetName() (string, error)
 	SetName(name string) error
 
+	CreateUser(u User) (User, error)
+
+	GetUserByName(username string) (User, error)
+
+	ExistName(username string) (bool, error)
+
+	ChangeUsername(userID int, newUsername string) error
+
+	CreateGroup(g Group, userID int) (Group, error)
+
+	ExistGroup(groupID int) (bool, error)
+
+	ExistUserInGroup(userID int, groupID int) (bool, error)
+
+	AddUserToGroup(userID int, groupID int) error
+
+	DeleteUserFromGroup(groupID int, userID int) error
+
+	DeleteGroup(groupID int) error
+
+	GetMemberGroup(groupID int) ([]int, error)
+
+	ChangeGroupName(groupID int, newGroupName string) error
+
+	CreateConversation(c Conversation) (Conversation, error)
+
+	CreateMessage(m Message) (Message, error)
+
+	DeleteUser(userID int) error
+
+	SearchUser(usersearch string) ([]User, error)
+
+	GetConversation(conversationID int) (Conversation, error)
+
+	GetListConversations(userID int) ([]Conversation, error)
+
+	AddMemberPrivate(conversationID int, userID int) error
+
+	GetConversationPrivate(conversationID int, userID int) (Conversation, error)
+
+	GetMessage(conversationID int, messageID int) (Message, error)
+
+	ExistUserID(userID int) (bool, error)
+
+	GetConversationIDfrom2Users(userID1 int, userID2 int) (Conversation, error)
+
+	ExistMessage(messageID int, conversationID int) (bool, error)
+
+	CreateComment(comment Comment) (Comment, error)
+
+	DeleteMessage(messageID int, conversationID int) error
+
+	DeleteComment(commentID int) error
+
+	ExistComment(commentID int, messageID int) (bool, error)
+
 	Ping() error
 }
 
@@ -55,8 +111,60 @@ func New(db *sql.DB) (AppDatabase, error) {
 		return nil, errors.New("database is required when building a AppDatabase")
 	}
 
+	var tableCount uint8
+	err := db.QueryRow(`SELECT count(name) FROM sqlite_master WHERE type='table';`).Scan(&tableCount)
+	if err != nil {
+		return nil, fmt.Errorf("error checking if database is empty: %w", err)
+	}
+
+	if tableCount != 7 {
+		//-----CREATE USER TABLE -------//
+		_, err = db.Exec(sql_USERTABLE)
+		if err != nil {
+			return nil, fmt.Errorf("error creating database structure: %w", err)
+
+		}
+
+		_, err = db.Exec(sql_GROUPTABLE)
+		if err != nil {
+			return nil, fmt.Errorf("error creating database structure: %w", err)
+
+		}
+
+		_, err = db.Exec(sql_MEMBERGROUPTABLE)
+		if err != nil {
+			return nil, fmt.Errorf("error creating database structure: %w", err)
+
+		}
+
+		_, err = db.Exec(sqL_CONVERSATIONTABLE)
+		if err != nil {
+			return nil, fmt.Errorf("error creating database structure: %w", err)
+
+		}
+
+		_, err = db.Exec(sql_MESSAGETABLE)
+		if err != nil {
+			return nil, fmt.Errorf("error creating database structure: %w", err)
+
+		}
+
+		_, err = db.Exec(sql_MEMBERPRIVATETABLE)
+		if err != nil {
+			return nil, fmt.Errorf("error creating database structure: %w", err)
+
+		}
+
+		_, err = db.Exec(sql_COMMENTTABLE)
+		if err != nil {
+			return nil, fmt.Errorf("error creating database structure: %w", err)
+
+		}
+
+	}
+
 	// Check if table exists. If not, the database is empty, and we need to create the structure
-	var tableName string
+	/*var tableName string
 	err := db.QueryRow(`SELECT name FROM sqlite_master WHERE type='table' AND name='example_table';`).Scan(&tableName)
 	if errors.Is(err, sql.ErrNoRows) {
 		sqlStmt := `CREATE TABLE example_table (id INTEGER NOT NULL PRIMARY KEY, name TEXT);`
@@ -64,7 +172,7 @@ func New(db *sql.DB) (AppDatabase, error) {
 		if err != nil {
 			return nil, fmt.Errorf("error creating database structure: %w", err)
 		}
-	}
+	}*/
 
 	return &appdbimpl{
 		c: db,
