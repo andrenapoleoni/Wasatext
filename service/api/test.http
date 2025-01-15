@@ -257,8 +257,8 @@ content-type: application/json
 ###
 
 # COMMENT MESSAGE # 
-PUT http://localhost:3000/profiles/1/conversations/4/messages/1/comments HTTP/1.1
-Authorization: 1
+PUT http://localhost:3000/profiles/2/conversations/3/messages/1/comments HTTP/1.1
+Authorization: 2
 content-type: application/json
 
 {
