@@ -8,7 +8,7 @@ func (db *appdbimpl) GetMessage(conversationID int, messageID int) (Message, err
 	message.MessageID = messageID
 	message.ConversationID = conversationID
 
-	err := db.c.QueryRow(query_GETMESSAGE, messageID, conversationID).Scan(&message.MessageTXT)
+	err := db.c.QueryRow(query_GETMESSAGE, messageID, conversationID).Scan(&message.MessageTXT, &message.UserID)
 	if err != nil {
 		return message, err
 	}

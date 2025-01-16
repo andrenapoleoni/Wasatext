@@ -16,6 +16,10 @@ func (db *appdbimpl) GetListConversations(userID int) ([]Conversation, error) {
 	defer rows.Close()
 
 	for rows.Next() {
+		if rows.Err() != nil {
+			return conversations, err
+		}
+
 		var groupID int
 		err = rows.Scan(&groupID)
 		if err != nil {
@@ -29,6 +33,10 @@ func (db *appdbimpl) GetListConversations(userID int) ([]Conversation, error) {
 		defer lines.Close()
 
 		for lines.Next() {
+			if lines.Err() != nil {
+				return conversations, err
+			}
+
 			var conversation Conversation
 
 			err = lines.Scan(&conversation.ConversationID, &conversation.GroupID)
@@ -47,6 +55,10 @@ func (db *appdbimpl) GetListConversations(userID int) ([]Conversation, error) {
 	defer rows.Close()
 
 	for rows.Next() {
+		if rows.Err() != nil {
+			return conversations, err
+		}
+
 		var conversation Conversation
 		err = rows.Scan(&conversation.ConversationID, &conversation.GroupID)
 		if err != nil {

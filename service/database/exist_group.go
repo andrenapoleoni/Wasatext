@@ -5,13 +5,13 @@ import (
 	"errors"
 )
 
-var query_FINDGROUP = `SELECT groupID, groupName FROM Groupchat WHERE groupID = ?`
+var query_FINDGROUP = `SELECT groupID FROM Groupchat WHERE groupID = ?`
 
 func (db *appdbimpl) ExistGroup(groupID int) (bool, error) {
-	var existGroup Group
-	err := db.c.QueryRow(query_FINDGROUP, groupID).Scan(&existGroup.GroupID, &existGroup.Name)
+	var existGroup int
+	err := db.c.QueryRow(query_FINDGROUP, groupID).Scan(&existGroup)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return false, nil
 	}
-	return existGroup.GroupID != 0, err
+	return existGroup != 0, err
 }

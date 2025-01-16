@@ -13,6 +13,10 @@ func (db *appdbimpl) SearchUser(usersearch string) ([]User, error) {
 	defer rows.Close()
 
 	for rows.Next() {
+		if rows.Err() != nil {
+			return nil, err
+		}
+
 		var user User
 		err := rows.Scan(&user.UserID, &user.Username)
 		if err != nil {

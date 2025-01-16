@@ -21,7 +21,6 @@ func (db *appdbimpl) GetConversation(conversationID int) (Conversation, error) {
 func (db *appdbimpl) GetConversationPrivate(conversationID int, userID int) (Conversation, error) {
 	// get conversation from database
 	var conversation Conversation
-	conversation.ConversationID = conversationID
 
 	err := db.c.QueryRow(query_GETCONVERSATIONPRIVATE, conversationID, userID).Scan(&conversation.ConversationID)
 	if err != nil {

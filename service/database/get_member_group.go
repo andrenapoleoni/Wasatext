@@ -11,6 +11,10 @@ func (db *appdbimpl) GetMemberGroup(groupID int) ([]int, error) {
 	}
 	defer rows.Close()
 	for rows.Next() {
+		if rows.Err() != nil {
+			return nil, err
+		}
+
 		err = rows.Scan(&userID)
 		if err != nil {
 			return nil, err
