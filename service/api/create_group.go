@@ -23,7 +23,7 @@ func (rt *_router) CreateGroupDB(g Group, userID int) (Group, error) {
 	return g, nil
 }
 
-func (rt *_router) CreateaGroup(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
+func (rt *_router) createGroup(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	// check authorization
 	profileUserID, err := strconv.Atoi(ps.ByName("user"))
 	if err != nil {

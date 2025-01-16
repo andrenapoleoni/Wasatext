@@ -24,7 +24,7 @@ func (rt *_router) CreateConversationDB(c Conversation) (Conversation, error) {
 	return c, nil
 }
 
-func (rt *_router) CreateConversation(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
+func (rt *_router) createConversation(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 
 	// chcek authorization
 	profileUserID, err := strconv.Atoi(ps.ByName("user"))
