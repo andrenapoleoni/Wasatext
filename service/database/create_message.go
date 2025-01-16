@@ -16,7 +16,7 @@ func (db *appdbimpl) CreateMessage(message Message) (Message, error) {
 	m.ConversationID = message.ConversationID
 	m.UserID = message.UserID
 	m.MessageTXT = message.MessageTXT
-	//get last id from message
+	// get last id from message
 	var _maxID = sql.NullInt64{Int64: 0, Valid: false}
 
 	row, err := db.c.Query(query_MESSAGEMAXID, m.ConversationID)
@@ -44,10 +44,10 @@ func (db *appdbimpl) CreateMessage(message Message) (Message, error) {
 		}
 	}
 
-	//--------set new messageid----------//
+	// --------set new messageid---------- //
 	m.MessageID = maxID + 1
 
-	//add message to database
+	// add message to database
 	_, err = db.c.Exec(query_ADDMESSAGE, m.ConversationID, m.UserID, m.MessageID, m.MessageTXT)
 	if err != nil {
 		return m, err

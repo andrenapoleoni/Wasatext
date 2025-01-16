@@ -10,10 +10,10 @@ import (
 )
 
 func (rt *_router) DeleteUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
-	//check authorization
+	// check authorization
 	profileUserID, err := strconv.Atoi(ps.ByName("user"))
 	if err != nil {
-		http.Error(w, "Bad Request "+err.Error(), http.StatusBadRequest)
+		BadRequest(w, err, ctx, "Invalid user id")
 		return
 	}
 
@@ -23,16 +23,16 @@ func (rt *_router) DeleteUser(w http.ResponseWriter, r *http.Request, ps httprou
 		http.Error(w, "Forbidden", http.StatusForbidden)
 		return
 	}
-	//delete user
+	// delete user
 	err = rt.db.DeleteUser(userID)
 	if err != nil {
-		http.Error(w, "Internal Server Error "+err.Error(), http.StatusInternalServerError)
+		InternalServerError(w, err, "Failed to delete user", ctx)
 		return
 	}
 
-	//delete user from all groups
+	// delete user from all groups
 
-	//resposne
+	// resposne
 	w.WriteHeader(http.StatusNoContent)
 
 }

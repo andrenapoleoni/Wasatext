@@ -46,15 +46,15 @@ func (db *appdbimpl) CreateUser(u User) (User, error) {
 		}
 	}
 
-	//--------set new userid----------//
+	// --------set new userid---------- //
 	user.UserID = maxID + 1
 
-	//---------create user folder--------//
+	// ---------create user folder-------- //
 	path := "./storage/profiles/" + fmt.Sprint(user.UserID) + "/gallery"
 	if err := os.MkdirAll(path, os.ModePerm); err != nil {
 		return user, err
 	}
-	//--------set default-----------//
+	// --------set default----------- //
 	source, err := os.Open("./storage/default/defaultphoto.jpg")
 	if err != nil {
 		return user, err

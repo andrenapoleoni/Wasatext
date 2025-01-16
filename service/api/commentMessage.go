@@ -25,42 +25,42 @@ func (rt *_router) CreateCommentDB(comment Comment) (Comment, error) {
 }
 
 func (rt *_router) commentMessage(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
-	//check authorization
+	// check authorization
 	profileUserID, err := strconv.Atoi(ps.ByName("user"))
 	if err != nil {
-		http.Error(w, "Bad Request "+err.Error(), http.StatusBadRequest)
+		BadRequest(w, err, ctx, "Bad Request")
 		return
 	}
 
 	userID := ctx.UserID
 
 	if profileUserID != userID {
-		http.Error(w, "Forbidden", http.StatusForbidden)
+		Forbidden(w, err, ctx, "Forbidden")
 		return
 	}
-	//get conversation id from endopoint
+	// get conversation id from endopoint
 	conversationID, err := strconv.Atoi(ps.ByName("conversation"))
 	if err != nil {
-		http.Error(w, "Bad Request "+err.Error(), http.StatusBadRequest)
+		BadRequest(w, err, ctx, "Bad Request")
 		return
 	}
-	//check if conversation exists
+	// check if conversation exists
 	conversation, err := rt.db.GetConversation(conversationID)
 	if err != nil {
-		http.Error(w, "Internal Server Error "+err.Error(), http.StatusInternalServerError)
+		InternalServerError(w, err, "Internal Server Error", ctx)
 		return
 	}
 
-	//get message id from endpoint
+	// get message id from endpoint
 	messageID, err := strconv.Atoi(ps.ByName("message"))
 	if err != nil {
-		http.Error(w, "Bad Request "+err.Error(), http.StatusBadRequest)
+		BadRequest(w, err, ctx, "Bad Request")
 		return
 	}
-	//check if message exists
+	// check if message exists
 	exist, err := rt.db.ExistMessage(messageID, conversation.ConversationID)
 	if err != nil {
-		http.Error(w, "Internal Server Error "+err.Error(), http.StatusInternalServerError)
+		InternalServerError(w, err, "Internal Server Error", ctx)
 		return
 	}
 	if !exist {
@@ -68,35 +68,35 @@ func (rt *_router) commentMessage(w http.ResponseWriter, r *http.Request, ps htt
 		return
 	}
 
-	//take comment from body
+	// take comment from body
 	var comment Comment
 	err = json.NewDecoder(r.Body).Decode(&comment)
 	if err != nil {
-		http.Error(w, "Bad Request "+err.Error(), http.StatusBadRequest)
+		BadRequest(w, err, ctx, "Bad Request")
 		return
 	}
 	comment.UserID = userID
 	comment.MessageID = messageID
 	comment.ConversationID = conversationID
 
-	//check if comment is valid
+	// check if comment is valid
 	if !comment.IsValid() {
-		http.Error(w, "Bad Request", http.StatusBadRequest)
+		BadRequest(w, err, ctx, "Bad Request")
 		return
 	}
 
-	//create comment
+	// create comment
 	comment, err = rt.CreateCommentDB(comment)
 	if err != nil {
-		http.Error(w, "Internal Server Error "+err.Error(), http.StatusInternalServerError)
+		InternalServerError(w, err, "Internal Server Error", ctx)
 		return
 	}
 
-	//response
+	// response
 	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(comment); err != nil {
-		ctx.Logger.WithError(err).Error("can't encode the response for group creation")
-		http.Error(w, "Internal Server Error: unable to encode response", http.StatusInternalServerError)
+	err = json.NewEncoder(w).Encode(comment)
+	if err != nil {
+		InternalServerError(w, err, "Internal Server Error", ctx)
 		return
 	}
 

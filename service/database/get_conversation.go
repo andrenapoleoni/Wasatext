@@ -5,7 +5,7 @@ var query_GETCONVERSATION = `SELECT groupID FROM Conversation WHERE conversation
 var query_GETCONVERSATIONPRIVATE = `SELECT conversationID FROM MemberPrivate WHERE conversationID = ? AND  userID = ?;`
 
 func (db *appdbimpl) GetConversation(conversationID int) (Conversation, error) {
-	//get conversation from database
+	// get conversation from database
 	var conversation Conversation
 	conversation.ConversationID = conversationID
 
@@ -19,7 +19,7 @@ func (db *appdbimpl) GetConversation(conversationID int) (Conversation, error) {
 }
 
 func (db *appdbimpl) GetConversationPrivate(conversationID int, userID int) (Conversation, error) {
-	//get conversation from database
+	// get conversation from database
 	var conversation Conversation
 	conversation.ConversationID = conversationID
 
@@ -33,7 +33,7 @@ func (db *appdbimpl) GetConversationPrivate(conversationID int, userID int) (Con
 }
 
 func (db *appdbimpl) GetConversationIDfrom2Users(userID1 int, userID2 int) (Conversation, error) {
-	//get conversation from database
+	// get conversation from database
 	var conversation Conversation
 
 	err := db.c.QueryRow(`SELECT c1.conversation_id

@@ -11,13 +11,13 @@ import (
 )
 
 func (rt *_router) CreateMessageDB(message Message) (Message, error) {
-	//create message in database
+	// create message in database
 	messageDB, err := rt.db.CreateMessage(message.ToDatabase())
 	if err != nil {
 		return message, err
 	}
 
-	//convert message from database
+	// convert message from database
 	err = message.FromDatabase(messageDB)
 	if err != nil {
 		return message, err
@@ -28,60 +28,64 @@ func (rt *_router) CreateMessageDB(message Message) (Message, error) {
 }
 
 func (rt *_router) sendMessage(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
-	//check authorization
+	// check authorization
 	profileUserID, err := strconv.Atoi(ps.ByName("user"))
 	if err != nil {
-		http.Error(w, "Bad Request "+err.Error(), http.StatusBadRequest)
+		BadRequest(w, err, ctx, "Bad Request")
 		return
 	}
 
 	userID := ctx.UserID
 
 	if profileUserID != userID {
-		http.Error(w, "Forbidden", http.StatusForbidden)
+		Forbidden(w, err, ctx, "Forbidden")
 		return
 	}
-	//get conversation id
+	// get conversation id
 	conversationID, err := strconv.Atoi(ps.ByName("conversation"))
 	if err != nil {
-		http.Error(w, "Bad Request "+err.Error(), http.StatusBadRequest)
+		BadRequest(w, err, ctx, "Bad Request")
 		return
 	}
-	//chech if conversation exist
+	// chech if conversation exist
 	conversation, err := rt.db.GetConversation(conversationID)
 	if err != nil {
-		http.Error(w, "Internal Server Error "+err.Error(), http.StatusInternalServerError)
+		InternalServerError(w, err, "Internal Server Error", ctx)
 		return
 	}
-	//check if conversation is private
+	// check if conversation is private
 	if conversation.GroupID == 0 {
 		conversation, err = rt.db.GetConversationPrivate(conversationID, userID)
 		if err != nil {
-			http.Error(w, "Internal Server Error "+err.Error(), http.StatusInternalServerError)
+			InternalServerError(w, err, "Internal Server Error", ctx)
 			return
 		}
 	}
 
-	//get messagetxt from body
+	// get messagetxt from body
 	var message Message
 	if err := json.NewDecoder(r.Body).Decode(&message); err != nil {
-		http.Error(w, "Bad Request "+err.Error(), http.StatusBadRequest)
+		BadRequest(w, err, ctx, "Bad Request")
 		return
 	}
 
 	message.UserID = userID
 	message.ConversationID = conversationID
 
-	//send message
+	// send message
 	message, err = rt.CreateMessageDB(message)
 	if err != nil {
-		http.Error(w, "Internal Server Error "+err.Error(), http.StatusInternalServerError)
+		InternalServerError(w, err, "Internal Server Error", ctx)
 		return
 	}
 
-	//response
+	// response
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(message)
+	err = json.NewEncoder(w).Encode(message)
+	if err != nil {
+		InternalServerError(w, err, "Internal Server Error", ctx)
+		return
+	}
 
 }

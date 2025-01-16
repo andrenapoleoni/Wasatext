@@ -8,7 +8,7 @@ var query_TAKEGROUP = "SELECT * FROM membergroup WHERE userID = ? "
 
 func (db *appdbimpl) GetListConversations(userID int) ([]Conversation, error) {
 	var conversations []Conversation
-	//get conversation of group where user is member
+	// get conversation of group where user is member
 	rows, err := db.c.Query(query_TAKEGROUP, userID)
 	if err != nil {
 		return conversations, err

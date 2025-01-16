@@ -11,35 +11,31 @@ import (
 func (rt *_router) doLogin(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	var user User
 
-	//read the request body
+	// read the request body
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
-		http.Error(w, "Bad request"+err.Error(), http.StatusBadRequest)
+		BadRequest(w, err, ctx, "Invalid request body")
 		return
 	}
 
-	//check if username is valid
+	// check if username is valid
 	if !user.IsValid() {
-		http.Error(w, "INVALID USERNAME", http.StatusBadRequest)
+		BadRequest(w, nil, ctx, "Invalid username")
 		return
 
 	}
 
-	/*check if user exist
-	if exist return user
-	else create a new user*/
+	// check if user exist
 	exist, err := rt.db.ExistName(user.Username)
 	if err != nil {
-		ctx.Logger.WithError(err).Error("can't check the username")
-		w.WriteHeader(http.StatusInternalServerError)
+		InternalServerError(w, err, "Failed to check user existence", ctx)
 		return
 	}
 
 	if !exist {
 		user, err = rt.CreateUser(user)
 		if err != nil {
-			ctx.Logger.WithError(err).Error("can't create the user")
-			w.WriteHeader(http.StatusInternalServerError)
+			InternalServerError(w, err, "Failed to create user", ctx)
 			return
 
 		}
@@ -47,14 +43,12 @@ func (rt *_router) doLogin(w http.ResponseWriter, r *http.Request, ps httprouter
 	} else {
 		dbUser, err := rt.db.GetUserByName(user.Username)
 		if err != nil {
-			ctx.Logger.WithError(err).Error("can't get the user")
-			w.WriteHeader(http.StatusInternalServerError)
+			InternalServerError(w, err, "Failed to get user", ctx)
 			return
 		}
 		err = user.FromDatabase(dbUser)
 		if err != nil {
-			ctx.Logger.WithError(err).Error("can't  convert the user")
-			w.WriteHeader(http.StatusInternalServerError)
+			InternalServerError(w, err, "Failed to get user", ctx)
 			return
 		}
 		w.WriteHeader(http.StatusOK)
@@ -66,11 +60,10 @@ func (rt *_router) doLogin(w http.ResponseWriter, r *http.Request, ps httprouter
 	}
 
 	authUser := AuthUser{user, user.UserID}
-
+	// response
 	w.Header().Set("content-type", "application/json")
 	if err := json.NewEncoder(w).Encode(authUser); err != nil {
-		ctx.Logger.WithError(err).Error("can't encode the response")
-		w.WriteHeader(http.StatusInternalServerError)
+		InternalServerError(w, err, "Failed to encode response", ctx)
 		return
 	}
 }

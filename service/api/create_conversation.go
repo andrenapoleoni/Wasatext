@@ -26,69 +26,66 @@ func (rt *_router) CreateConversationDB(c Conversation) (Conversation, error) {
 
 func (rt *_router) CreateConversation(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 
-	//chcek authorization
+	// chcek authorization
 	profileUserID, err := strconv.Atoi(ps.ByName("user"))
 	if err != nil {
-		http.Error(w, "Bad Request "+err.Error(), http.StatusBadRequest)
+		BadRequest(w, err, ctx, "Bad Request")
 		return
 	}
 
 	userID := ctx.UserID
 
-	//check authorization
+	// check authorization
 	if profileUserID != userID {
-		http.Error(w, "Forbidden", http.StatusForbidden)
+		Forbidden(w, err, ctx, "Forbidden")
 		return
 	}
-	//get users of conversation
+	// get users of conversation
 	var u2 User
 
 	u2.UserID, err = strconv.Atoi(ps.ByName("conversation"))
 	if err != nil {
-		http.Error(w, "Bad Request "+err.Error(), http.StatusBadRequest)
+		BadRequest(w, err, ctx, "Bad Request")
 		return
 	}
 
-	//create conversation
+	// create conversation
 	var c Conversation
 
 	c, err = rt.CreateConversationDB(c)
 	if err != nil {
-		ctx.Logger.WithError(err).Error("can't create conversation")
-		w.WriteHeader(http.StatusInternalServerError)
+		InternalServerError(w, err, "Internal Server Error", ctx)
 		return
 	}
-	//add user to member private table
+	// add user to member private table
 	err = rt.db.AddMemberPrivate(c.ConversationID, userID)
 	if err != nil {
-		ctx.Logger.WithError(err).Error("can't add member to conversation")
-		w.WriteHeader(http.StatusInternalServerError)
+		InternalServerError(w, err, "Internal Server Error", ctx)
 		return
 	}
 	err = rt.db.AddMemberPrivate(c.ConversationID, u2.UserID)
 	if err != nil {
-		ctx.Logger.WithError(err).Error("can't add member to conversation")
-		w.WriteHeader(http.StatusInternalServerError)
+		InternalServerError(w, err, "Internal Server Error", ctx)
 		return
 	}
 
-	//get messagetxt from body
+	// get messagetxt from body
 	var message Message
 	if err := json.NewDecoder(r.Body).Decode(&message); err != nil {
-		http.Error(w, "Bad Request "+err.Error(), http.StatusBadRequest)
+		BadRequest(w, err, ctx, "Bad Request")
 		return
 	}
 
 	message.ConversationID = c.ConversationID
 	message.UserID = userID
-	//send message
+	// send message
 	message, err = rt.CreateMessageDB(message)
 	if err != nil {
-		http.Error(w, "Internal Server Error "+err.Error(), http.StatusInternalServerError)
+		InternalServerError(w, err, "Internal Server Error", ctx)
 		return
 	}
 
-	//response
+	// response
 	w.WriteHeader(http.StatusCreated)
 
 }

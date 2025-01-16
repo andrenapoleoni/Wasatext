@@ -3,7 +3,7 @@ package database
 var query_GETMESSAGE = `SELECT message, userID FROM Message WHERE messageID = ? AND conversationID = ?;`
 
 func (db *appdbimpl) GetMessage(conversationID int, messageID int) (Message, error) {
-	//get message from database
+	// get message from database
 	var message Message
 	message.MessageID = messageID
 	message.ConversationID = conversationID

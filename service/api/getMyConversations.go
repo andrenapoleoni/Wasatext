@@ -10,29 +10,33 @@ import (
 )
 
 func (rt *_router) getMyConversations(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
-	//check authorization
+	// check authorization
 	profileUserID, err := strconv.Atoi(ps.ByName("user"))
 	if err != nil {
-		http.Error(w, "Bad Request "+err.Error(), http.StatusBadRequest)
+		BadRequest(w, err, ctx, "Bad Request")
 		return
 	}
 
 	userID := ctx.UserID
 
-	//check authorization
+	// check authorization
 	if profileUserID != userID {
-		http.Error(w, "Forbidden", http.StatusForbidden)
+		Forbidden(w, err, ctx, "Forbidden")
 		return
 	}
-	//get conversations
+	// get conversations
 	conversations, err := rt.db.GetListConversations(userID)
 	if err != nil {
-		http.Error(w, "Internal Server Error "+err.Error(), http.StatusInternalServerError)
+		InternalServerError(w, err, "Internal Server Error", ctx)
 		return
 	}
-	//return conversations
+	// return conversations
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(conversations)
+	err = json.NewEncoder(w).Encode(conversations)
+	if err != nil {
+		InternalServerError(w, err, "Internal Server Error", ctx)
+		return
+	}
 
 }

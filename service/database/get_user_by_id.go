@@ -3,7 +3,7 @@ package database
 var query_GETUSERBYID = `SELECT username FROM User WHERE userID = ?;`
 
 func (db *appdbimpl) GetUserByID(userID int) (User, error) {
-	//get user from database
+	// get user from database
 	var user User
 	user.UserID = userID
 

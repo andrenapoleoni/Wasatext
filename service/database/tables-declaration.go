@@ -1,6 +1,6 @@
 package database
 
-//-------USER Table-------//
+// -------USER Table------- //
 
 var sql_USERTABLE = ` CREATE TABLE IF NOT EXISTS User
 (
@@ -9,7 +9,7 @@ var sql_USERTABLE = ` CREATE TABLE IF NOT EXISTS User
 	PRIMARY KEY(userID)	
 );`
 
-// ---------MESSAGE TABLE--------//
+// ---------MESSAGE TABLE-------- //
 var sql_MESSAGETABLE = ` CREATE TABLE IF NOT EXISTS Message
 (
 	conversationID INTEGER NOT NULL ,
@@ -20,7 +20,7 @@ var sql_MESSAGETABLE = ` CREATE TABLE IF NOT EXISTS Message
 	PRIMARY KEY(messageID)
 );`
 
-// -------CONVERSATION TABLE-------//
+// -------CONVERSATION TABLE------- //
 
 var sqL_CONVERSATIONTABLE = ` CREATE TABLE IF NOT EXISTS Conversation 
 (
@@ -33,7 +33,7 @@ var sqL_CONVERSATIONTABLE = ` CREATE TABLE IF NOT EXISTS Conversation
 
 );`
 
-// ------GROUP TABLE-------//
+// ------GROUP TABLE------- //
 var sql_GROUPTABLE = ` CREATE TABLE IF NOT EXISTS Groupchat 
 (
 	groupID INTEGER NOT NULL UNIQUE,
@@ -43,7 +43,7 @@ var sql_GROUPTABLE = ` CREATE TABLE IF NOT EXISTS Groupchat
 
 );`
 
-// --------MEMBER GROUP TABLE-------//
+// --------MEMBER GROUP TABLE------- //
 var sql_MEMBERGROUPTABLE = ` CREATE TABLE IF NOT EXISTS MemberGroup 
 (
 	groupID INTEGER,
@@ -55,7 +55,7 @@ var sql_MEMBERGROUPTABLE = ` CREATE TABLE IF NOT EXISTS MemberGroup
 
 );`
 
-// -----------MEMBER PRIVATE CHAT--------//
+// -----------MEMBER PRIVATE CHAT-------- //
 var sql_MEMBERPRIVATETABLE = ` CREATE TABLE IF NOT EXISTS MemberPrivate
 (
 	conversationID INTEGER NOT NULL,
@@ -65,7 +65,7 @@ var sql_MEMBERPRIVATETABLE = ` CREATE TABLE IF NOT EXISTS MemberPrivate
 
 );`
 
-// -------COMMENT TABLE-------//
+// -------COMMENT TABLE------- //
 var sql_COMMENTTABLE = ` CREATE TABLE IF NOT EXISTS Comment
 (
 	commentID INTEGER NOT NULL,

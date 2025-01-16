@@ -10,38 +10,41 @@ import (
 )
 
 func (rt *_router) getConversation(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
-	//check authorization
+	// check authorization
 	profileUserID, err := strconv.Atoi(ps.ByName("user"))
 	if err != nil {
-		http.Error(w, "Bad Request "+err.Error(), http.StatusBadRequest)
+		BadRequest(w, err, ctx, "Bad Request")
 		return
 	}
 
 	userID := ctx.UserID
 
-	//check authorization
+	// check authorization
 	if profileUserID != userID {
-		http.Error(w, "Forbidden", http.StatusForbidden)
+		Forbidden(w, err, ctx, "Forbidden")
 		return
 	}
-	//get receiverID from endpoint
 
-	//get conversationID from endpoint
+	// get conversationID from endpoint
 	conversationID, err := strconv.Atoi(ps.ByName("conversation"))
 	if err != nil {
-		http.Error(w, "Bad Request "+err.Error(), http.StatusBadRequest)
+		BadRequest(w, err, ctx, "Bad Request")
 		return
 	}
 
-	//check if conversation exists
+	// check if conversation exists
 	conversation, err := rt.db.GetConversation(conversationID)
 	if err != nil {
 		http.Error(w, "Not Found", http.StatusNotFound)
 		return
 	}
-	//return conversation
+	// return conversation
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(conversation)
+	err = json.NewEncoder(w).Encode(conversation)
+	if err != nil {
+		InternalServerError(w, err, "Internal Server Error", ctx)
+		return
+	}
 
 }

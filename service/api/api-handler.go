@@ -8,47 +8,47 @@ import (
 func (rt *_router) Handler() http.Handler {
 
 	// User routes
-	//--------LOGIN AND REGISTER---------//
+	//	--------LOGIN AND REGISTER---------	//
 	rt.router.POST("/session", rt.wrap(rt.doLogin, false))
-	//-----SET USERNAME-----//
+	//	-----SET USERNAME-----	//
 	rt.router.PUT("/profiles/:user/username", rt.wrap(rt.setMyUserName, true))
-	//--------DELETE USER------//
+	//	--------DELETE USER------	//
 	rt.router.DELETE("/profiles/:user", rt.wrap(rt.DeleteUser, true))
-	//--------SEARCH USER------//
+	//	--------SEARCH USER------	//
 	rt.router.GET("/profiles", rt.wrap(rt.SearchUser, true))
 
-	//Group routes
-	//--------CREATE GROUP------//
+	// Group routes
+	// --------CREATE GROUP------ //
 	rt.router.POST("/profiles/:user/groups", rt.wrap(rt.CreateaGroup, true))
-	//--------ADD TO GROUP------//
+	//  --------ADD TO GROUP------  //
 	rt.router.POST("/profiles/:user/groups/:group", rt.wrap(rt.addToGroup, true))
-	//--------LEAVE GROUP------//
+	// --------LEAVE GROUP------ //
 	rt.router.DELETE("/profiles/:user/groups/:group", rt.wrap(rt.leaveGroup, true))
-	//--------SET GROUPNAME------//
+	// --------SET GROUPNAME------ //
 	rt.router.PUT("/profiles/:user/groups/:group/groupname", rt.wrap(rt.setGroupName, true))
 
-	//Conversation routes
-	//--------CREATE CONVERSATION------//
+	// Conversation routes
+	// --------CREATE CONVERSATION------ //
 	rt.router.PUT("/profiles/:user/conversations/:conversation", rt.wrap(rt.CreateConversation, true))
-	//--------SEND MESSAGE------//
+	// --------SEND MESSAGE------ //
 	rt.router.POST("/profiles/:user/conversations/:conversation/messages", rt.wrap(rt.sendMessage, true))
-	//--------GET CONVERSATION------//
+	// --------GET CONVERSATION------ //
 	rt.router.GET("/profiles/:user/conversations/:conversation", rt.wrap(rt.getConversation, true))
-	//--------GET CONVERSATIONS------//
+	// --------GET CONVERSATIONS------ //
 	rt.router.GET("/profiles/:user/conversations", rt.wrap(rt.getMyConversations, true))
-	//Message routes
-	//--------FORWARD MESSAGE------//
+	// Message routes
+	// --------FORWARD MESSAGE------ //
 	rt.router.POST("/profiles/:user/conversations/:conversation/messages/:message", rt.wrap(rt.forwardMessage, true))
-	//------COMMENT MESSAGE------//
+	// ------COMMENT MESSAGE------ //
 	rt.router.PUT("/profiles/:user/conversations/:conversation/messages/:message/comments", rt.wrap(rt.commentMessage, true))
-	//------DELETE MESSAGE------//
+	// ------DELETE MESSAGE------ //
 	rt.router.DELETE("/profiles/:user/conversations/:conversation/messages/:message", rt.wrap(rt.deleteMessage, true))
-	//------DELETE COMMENT------//
+	// ------DELETE COMMENT------ //
 	rt.router.DELETE("/profiles/:user/conversations/:conversation/messages/:message/comments/:comment", rt.wrap(rt.uncommentMessage, true))
 
-	//special routes
+	// special routes
 	rt.router.GET("/liveness", rt.liveness)
 
-	//return router
+	// return router
 	return rt.router
 }

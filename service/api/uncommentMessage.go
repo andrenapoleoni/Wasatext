@@ -11,40 +11,42 @@ import (
 
 func (rt *_router) uncommentMessage(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 
-	//check authorization
+	// check authorization
 	profileUserID, err := strconv.Atoi(ps.ByName("user"))
 	if err != nil {
-		http.Error(w, "Bad Request "+err.Error(), http.StatusBadRequest)
+		BadRequest(w, err, ctx, "Invalid user id")
 		return
 	}
 
 	userID := ctx.UserID
 
 	if profileUserID != userID {
-		http.Error(w, "Forbidden", http.StatusForbidden)
+		Forbidden(w, err, ctx, "Forbidden")
 		return
 	}
-	//take conversation id from endpoint
+	// take conversation id from endpoint
 	conversationID, err := strconv.Atoi(ps.ByName("conversation"))
 	if err != nil {
+		BadRequest(w, err, ctx, "Invalid conversation id")
 		return
 	}
-	//check if conversation exists
+	// check if conversation exists
 	conversation, err := rt.db.GetConversation(conversationID)
 	if err != nil {
-		http.Error(w, "Internal Server Error "+err.Error(), http.StatusInternalServerError)
+		InternalServerError(w, err, "Failed to get conversation", ctx)
 		return
 	}
 
-	//take messageID from endpoint
+	// take messageID from endpoint
 	messageID, err := strconv.Atoi(ps.ByName("message"))
 	if err != nil {
+		BadRequest(w, err, ctx, "Invalid message id")
 		return
 	}
-	//check if message exist
+	// check if message exist
 	exist, err := rt.db.ExistMessage(messageID, conversation.ConversationID)
 	if err != nil {
-		http.Error(w, "Internal Server Error "+err.Error(), http.StatusInternalServerError)
+		InternalServerError(w, err, "Failed to check message existence", ctx)
 		return
 	}
 	if !exist {
@@ -52,15 +54,16 @@ func (rt *_router) uncommentMessage(w http.ResponseWriter, r *http.Request, ps h
 		return
 	}
 
-	//take commentId from endpoint
+	// take commentId from endpoint
 	commentID, err := strconv.Atoi(ps.ByName("comment"))
 	if err != nil {
+		BadRequest(w, err, ctx, "Invalid comment id")
 		return
 	}
-	//check if comment exists
+	// check if comment exists
 	exist, err = rt.db.ExistComment(commentID, messageID)
 	if err != nil {
-		http.Error(w, "Internal Server Error "+err.Error(), http.StatusInternalServerError)
+		InternalServerError(w, err, "Failed to check comment existence", ctx)
 		return
 	}
 	if !exist {
@@ -68,14 +71,14 @@ func (rt *_router) uncommentMessage(w http.ResponseWriter, r *http.Request, ps h
 		return
 	}
 
-	//delete comment
+	// delete comment
 	err = rt.db.DeleteComment(commentID)
 	if err != nil {
-		http.Error(w, "Internal Server Error "+err.Error(), http.StatusInternalServerError)
+		InternalServerError(w, err, "Failed to delete comment", ctx)
 		return
 	}
 
-	//response
+	// response
 	w.WriteHeader(http.StatusOK)
 
 }

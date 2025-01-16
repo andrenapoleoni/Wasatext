@@ -15,7 +15,7 @@ func (db *appdbimpl) CreateComment(comment Comment) (Comment, error) {
 	c.MessageID = comment.MessageID
 	c.UserID = comment.UserID
 	c.CommentTXT = comment.CommentTXT
-	//get last id from message
+	// get last id from message
 	var _maxID = sql.NullInt64{Int64: 0, Valid: false}
 
 	row, err := db.c.Query(sql_MAXIDCOMMENT)
@@ -43,10 +43,10 @@ func (db *appdbimpl) CreateComment(comment Comment) (Comment, error) {
 		}
 	}
 
-	//--------set new messageid----------//
+	// --------set new messageid---------- //
 	c.CommentID = maxID + 1
 
-	//add message to database
+	// add message to database
 	_, err = db.c.Exec(sql_CREATECOMMENT, c.CommentID, c.MessageID, c.CommentTXT, c.ConversationID, c.UserID)
 	if err != nil {
 		return c, err

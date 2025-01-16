@@ -9,50 +9,43 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-/* description
-.
-.
-.
-*/
-
 func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	profileUserID, err := strconv.Atoi(ps.ByName("user"))
 	if err != nil {
-		http.Error(w, "Bad Request"+err.Error(), http.StatusBadRequest)
+		BadRequest(w, err, ctx, "Invalid user id")
 		return
 	}
 
 	userID := ctx.UserID
 
-	//check authorization
+	// check authorization
 	if profileUserID != userID {
-		http.Error(w, "Forbidden", http.StatusForbidden)
+		Forbidden(w, err, ctx, "Forbidden")
 		return
 	}
-	//take data from the body request
+	// take data from the body request
 	var user User
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
-		http.Error(w, "Bad Request"+err.Error(), http.StatusBadRequest)
+		BadRequest(w, err, ctx, "Invalid request body")
 		return
 	}
-	//check if username is valid
+	// check if username is valid
 	if !user.IsValid() {
-		http.Error(w, "INVALID USERNAME", http.StatusBadRequest)
+		BadRequest(w, nil, ctx, "Invalid username")
 		return
 	}
 
-	//change username, if username already taken return an error
+	// change username, if username already taken return an error
 	if err := rt.db.ChangeUsername(userID, user.Username); err != nil {
-		http.Error(w, "username already taken, please retry", http.StatusBadRequest)
+		InternalServerError(w, err, "Failed to change username: already taken", ctx)
 		return
 	}
 
-	//response success message
+	// response success message
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("content-type", "plain/text")
 	if err := json.NewEncoder(w).Encode("Username changed succesfully"); err != nil {
-		ctx.Logger.WithError(err).Error("can't encode the response")
-		w.WriteHeader(http.StatusInternalServerError)
+		InternalServerError(w, err, "Failed to encode response", ctx)
 		return
 	}
 

@@ -43,15 +43,15 @@ func (db *appdbimpl) CreateGroup(g Group, userID int) (Group, error) {
 			maxIDG = int(_maxIDG.Int64)
 		}
 	}
-	//set new group id
+	// set new group id
 	group.GroupID = maxIDG + 1
 
-	//---------create group folder--------//
+	// ---------create group folder-------- //
 	path := "./storage/group/" + fmt.Sprint(group.GroupID) + "/gallery"
 	if err := os.MkdirAll(path, os.ModePerm); err != nil {
 		return group, err
 	}
-	//--------set default-----------//
+	// --------set default----------- //
 	source, err := os.Open("./storage/default/defaultphoto.jpg")
 	if err != nil {
 		return group, err

@@ -15,7 +15,7 @@ func (db *appdbimpl) CreateConversation(conversation Conversation) (Conversation
 	var c Conversation
 	c.GroupID = conversation.GroupID
 
-	//get last id from conversation
+	// get last id from conversation
 
 	var _maxID = sql.NullInt64{Int64: 0, Valid: false}
 
@@ -44,9 +44,9 @@ func (db *appdbimpl) CreateConversation(conversation Conversation) (Conversation
 		}
 	}
 
-	//--------set new conversationid----------//
+	// --------set new conversationid---------- //
 	c.ConversationID = maxID + 1
-	//add conversation to database
+	// add conversation to database
 	if c.GroupID == 0 {
 		_, err = db.c.Exec(query_ADDCONVERSATION, c.ConversationID, c.GroupID)
 		if err != nil {

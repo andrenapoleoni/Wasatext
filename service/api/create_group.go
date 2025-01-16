@@ -24,95 +24,89 @@ func (rt *_router) CreateGroupDB(g Group, userID int) (Group, error) {
 }
 
 func (rt *_router) CreateaGroup(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
-	//check authorization
+	// check authorization
 	profileUserID, err := strconv.Atoi(ps.ByName("user"))
 	if err != nil {
-		http.Error(w, "Bad Request "+err.Error(), http.StatusBadRequest)
+		BadRequest(w, err, ctx, "Invalid user ID")
 		return
 	}
 
 	userID := ctx.UserID
 
 	if profileUserID != userID {
-		http.Error(w, "Forbidden", http.StatusForbidden)
+		Forbidden(w, err, ctx, "Forbidden")
 		return
 	}
-	//var
+	// var
 	var group Group
 	type msg struct {
 		Groupname    string   `json:"groupname"`
 		Usernamelist []string `json:"usernamelist"`
 	}
 	var Msg msg
-	//take data from the body request
+	// take data from the body request
 	if err := json.NewDecoder(r.Body).Decode(&Msg); err != nil {
-		http.Error(w, "Bad Request "+err.Error(), http.StatusBadRequest)
+		BadRequest(w, err, ctx, "Invalid request body")
 		return
 	}
 	group.Name = Msg.Groupname
-	//check if name of group is valid
+	// check if name of group is valid
 	if !group.IsValid() {
-		http.Error(w, "INVALID NAME", http.StatusBadRequest)
+		BadRequest(w, nil, ctx, "Invalid group name")
 		return
 	}
 
-	//set name
+	// set name
 	group, err = rt.CreateGroupDB(group, userID)
 	if err != nil {
-		ctx.Logger.WithError(err).Error("can't create group")
-		w.WriteHeader(http.StatusInternalServerError)
+		InternalServerError(w, err, "Unable to create group", ctx)
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
 
-	//list of users
+	// list of users
 	userList := Msg.Usernamelist
 	for i := 0; i < len(userList); i++ {
-		//check if user exyst by username
+		// check if user exyst by username
 		exist, err := rt.db.ExistName(userList[i])
 		if err != nil {
-			ctx.Logger.WithError(err).Error("can't check the username")
-			w.WriteHeader(http.StatusInternalServerError)
+			InternalServerError(w, err, "can't check if user exist", ctx)
 			return
 		}
 		if !exist {
-			http.Error(w, "INVALID USERNAME", http.StatusBadRequest)
+			BadRequest(w, nil, ctx, "INVALID USERNAME")
 			return
 
 		}
-		//get user by username
+		// get user by username
 		dbUser, err := rt.db.GetUserByName(userList[i])
 		if err != nil {
-			ctx.Logger.WithError(err).Error("can't get the user")
-			w.WriteHeader(http.StatusInternalServerError)
+			InternalServerError(w, err, "can't get user by username", ctx)
 			return
 
 		}
-		//add user to group
+		// add user to group
 		err = rt.db.AddUserToGroup(group.GroupID, dbUser.UserID)
 		if err != nil {
-			ctx.Logger.WithError(err).Error("can't add user to group")
-			w.WriteHeader(http.StatusInternalServerError)
+			InternalServerError(w, err, "can't add user to group", ctx)
 			return
 
 		}
 	}
-	//create conversation of group
+	// create conversation of group
 	var c Conversation
 	c.GroupID = group.GroupID
 
 	_, err = rt.CreateConversationDB(c)
 	if err != nil {
-		ctx.Logger.WithError(err).Error("can't create conversation")
-		w.WriteHeader(http.StatusInternalServerError)
+		InternalServerError(w, err, "can't create conversation", ctx)
 		return
 	}
 
 	// response
 	w.Header().Set("content-type", "application/json")
 	if err := json.NewEncoder(w).Encode(group); err != nil {
-		ctx.Logger.WithError(err).Error("can't encode the response for group creation")
-		http.Error(w, "Internal Server Error: unable to encode response", http.StatusInternalServerError)
+		InternalServerError(w, err, "can't encode response", ctx)
 		return
 	}
 

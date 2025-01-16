@@ -118,7 +118,7 @@ func New(db *sql.DB) (AppDatabase, error) {
 	}
 
 	if tableCount != 7 {
-		//-----CREATE USER TABLE -------//
+		// -----CREATE USER TABLE ------- //
 		_, err = db.Exec(sql_USERTABLE)
 		if err != nil {
 			return nil, fmt.Errorf("error creating database structure: %w", err)

@@ -12,28 +12,27 @@ import (
 func (rt *_router) addToGroup(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	profileUserID, err := strconv.Atoi(ps.ByName("user"))
 	if err != nil {
-		http.Error(w, "Bad Request "+err.Error(), http.StatusBadRequest)
+		BadRequest(w, err, ctx, "Bad Request")
 		return
 	}
 
 	userID := ctx.UserID
 
-	//check authorization
+	// check authorization
 	if profileUserID != userID {
-		http.Error(w, "Forbidden", http.StatusForbidden)
+		Forbidden(w, err, ctx, "Forbidden")
 		return
 	}
-	//check group id
+	// check group id
 	groupId, err := strconv.Atoi(ps.ByName("group"))
 	if err != nil {
-		http.Error(w, "Bad Request "+err.Error(), http.StatusBadRequest)
+		BadRequest(w, err, ctx, "Bad Request")
 		return
 	}
-	//check if group exist
+	// check if group exist
 	exist, err := rt.db.ExistGroup(groupId)
 	if err != nil {
-		ctx.Logger.WithError(err).Error("can't check the group")
-		w.WriteHeader(http.StatusInternalServerError)
+		InternalServerError(w, err, "can't check the group", ctx)
 		return
 	}
 
@@ -41,37 +40,34 @@ func (rt *_router) addToGroup(w http.ResponseWriter, r *http.Request, ps httprou
 		http.Error(w, "Group not found", http.StatusNotFound)
 		return
 	}
-	//BODY
+	// BODY
 	var newuser User
 	if err := json.NewDecoder(r.Body).Decode(&newuser); err != nil {
-		http.Error(w, "Bad Request "+err.Error(), http.StatusBadRequest)
+		BadRequest(w, err, ctx, "Bad Request")
 		return
 	}
-	//check if user exist
+	// check if user exist
 	exist, err = rt.db.ExistName(newuser.Username)
 	if err != nil {
-		ctx.Logger.WithError(err).Error("can't check the user")
-		w.WriteHeader(http.StatusInternalServerError)
+		InternalServerError(w, err, "can't check the user", ctx)
 		return
 	}
 	if !exist {
 		http.Error(w, "User not found", http.StatusNotFound)
 		return
 	}
-	//take user by name
+	// take user by name
 	newusergroup, err := rt.db.GetUserByName(newuser.Username)
 	if err != nil {
-		ctx.Logger.WithError(err).Error("can't get user")
-		w.WriteHeader(http.StatusInternalServerError)
+		InternalServerError(w, err, "can't get the user", ctx)
 		return
 	}
 	newuser.UserID = newusergroup.UserID
 
-	//check if user is already in the group
+	// check if user is already in the group
 	exist, err = rt.db.ExistUserInGroup(groupId, newuser.UserID)
 	if err != nil {
-		ctx.Logger.WithError(err).Error("can't get the group")
-		w.WriteHeader(http.StatusInternalServerError)
+		InternalServerError(w, err, "can't check if user is in the group", ctx)
 		return
 	}
 	if exist {
@@ -80,19 +76,18 @@ func (rt *_router) addToGroup(w http.ResponseWriter, r *http.Request, ps httprou
 
 	}
 
-	//add user to the group
+	// add user to the group
 	err = rt.db.AddUserToGroup(groupId, newuser.UserID)
 	if err != nil {
-		ctx.Logger.WithError(err).Error("can't add user to the group")
-		w.WriteHeader(http.StatusInternalServerError)
+		InternalServerError(w, err, "can't add user to the group", ctx)
 		return
 	}
 
-	//response
+	// response
 	w.WriteHeader(http.StatusCreated)
 	w.Header().Set("content-type", "plain/text")
 	if err := json.NewEncoder(w).Encode("Member added"); err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		InternalServerError(w, err, "can't encode the response", ctx)
 		return
 	}
 
