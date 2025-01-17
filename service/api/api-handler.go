@@ -16,6 +16,8 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.DELETE("/user/:user", rt.wrap(rt.DeleteUser, true))
 	//	--------SEARCH USER------	//
 	rt.router.GET("/user", rt.wrap(rt.searchUser, true))
+	//	--------SET PHOTO------	//
+	rt.router.PUT("/user/:user/photo", rt.wrap(rt.SetMyPhoto, true))
 
 	// Group routes
 	// --------CREATE GROUP------ //
@@ -26,6 +28,8 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.DELETE("/user/:user/groups/:group", rt.wrap(rt.leaveGroup, true))
 	// --------SET GROUPNAME------ //
 	rt.router.PUT("/user/:user/groups/:group/groupname", rt.wrap(rt.setGroupName, true))
+	// ---------SET GROUP PHOTO--------- //
+	rt.router.PUT("/user/:user/groups/:group/groupphoto", rt.wrap(rt.setGroupPhoto, true))
 
 	// Conversation routes
 	// --------CREATE CONVERSATION------ //
