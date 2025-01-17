@@ -38,9 +38,6 @@ import (
 
 // AppDatabase is the high level interface for the DB
 type AppDatabase interface {
-	GetName() (string, error)
-	SetName(name string) error
-
 	CreateUser(u User) (User, error)
 
 	GetUserByName(username string) (User, error)
@@ -85,7 +82,7 @@ type AppDatabase interface {
 
 	ExistUserID(userID int) (bool, error)
 
-	GetConversationIDfrom2Users(userID1 int, userID2 int) (Conversation, error)
+	ExistConversation(userID1 int, userID2 int) (bool, error)
 
 	ExistMessage(messageID int, conversationID int) (bool, error)
 

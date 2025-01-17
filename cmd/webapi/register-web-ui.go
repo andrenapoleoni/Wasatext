@@ -4,8 +4,8 @@ package main
 
 import (
 	"fmt"
-	"myWasatext/webui"
 	"io/fs"
+	"myWasatext/webui"
 	"net/http"
 	"strings"
 )

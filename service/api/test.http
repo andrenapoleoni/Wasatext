@@ -45,8 +45,18 @@ content-type: application/json
 
 ###
 
+#DO LOGIN#
+POST http://localhost:3000/session  HTTP/1.1
+content-type: application/json
+
+{
+    "username": "Balsamo"
+}
+
+###
+
 #CHANGE USERNAME#
-PUT http://localhost:3000/profiles/5/username HTTP/1.1
+PUT http://localhost:3000/user/5/username HTTP/1.1
 Authorization: 5
 content-type: application/json
 
@@ -56,7 +66,7 @@ content-type: application/json
 ###
 
 #CHANGE USERNAME#
-PUT http://localhost:3000/profiles/2/username HTTP/1.1
+PUT http://localhost:3000/user/2/username HTTP/1.1
 Authorization: 2
 content-type: application/json
 
@@ -66,7 +76,7 @@ content-type: application/json
 ###
 
 # CREATE GROUP #
-POST http://localhost:3000/profiles/1/groups  HTTP/1.1
+POST http://localhost:3000/user/1/groups  HTTP/1.1
 Authorization: 1
 content-type: application/json
 
@@ -80,7 +90,7 @@ content-type: application/json
 ###
 
 # CREATE GROUP #
-POST http://localhost:3000/profiles/2/groups  HTTP/1.1
+POST http://localhost:3000/user/2/groups  HTTP/1.1
 Authorization: 2
 content-type: application/json
 
@@ -94,7 +104,7 @@ content-type: application/json
 ###
 
 # CREATE GROUP #
-POST http://localhost:3000/profiles/1/groups  HTTP/1.1
+POST http://localhost:3000/user/1/groups  HTTP/1.1
 Authorization: 1
 content-type: application/json
 
@@ -107,7 +117,7 @@ content-type: application/json
 ###
 
 # ADD TO GROUP#
-POST http://localhost:3000/profiles/1/groups/1  HTTP/1.1
+POST http://localhost:3000/user/1/groups/1  HTTP/1.1
 Authorization: 1
 content-type: application/json
 
@@ -119,7 +129,7 @@ content-type: application/json
 
 ### 
 # ADD TO GROUP#
-POST http://localhost:3000/profiles/2/groups/2  HTTP/1.1
+POST http://localhost:3000/user/2/groups/2  HTTP/1.1
 Authorization: 2
 content-type: application/json
 
@@ -132,23 +142,23 @@ content-type: application/json
 
 ###
 #LEAVE GROUP#
-DELETE http://localhost:3000/profiles/1/groups/1  HTTP/1.1
+DELETE http://localhost:3000/user/1/groups/1  HTTP/1.1
 Authorization: 1
 
 ###
 #LEAVE GROUP#
-DELETE http://localhost:3000/profiles/2/groups/1  HTTP/1.1
+DELETE http://localhost:3000/user/2/groups/1  HTTP/1.1
 Authorization: 2
 
 ###
 #LEAVE GROUP#
-DELETE http://localhost:3000/profiles/3/groups/1  HTTP/1.1
+DELETE http://localhost:3000/user/3/groups/1  HTTP/1.1
 Authorization: 3
 
 ###
 
 # CHANGE GROUP NAME#
-PUT http://localhost:3000/profiles/1/groups/1/groupname  HTTP/1.1
+PUT http://localhost:3000/user/1/groups/1/groupname  HTTP/1.1
 Authorization: 1
 content-type: application/json
 
@@ -159,7 +169,7 @@ content-type: application/json
 ###
 
 # CREATE CONVERSATION #
-PUT http://localhost:3000/profiles/1/conversations/2  HTTP/1.1
+PUT http://localhost:3000/user/1/conversation/2  HTTP/1.1
 Authorization: 1
 content-type: application/json
 
@@ -169,7 +179,7 @@ content-type: application/json
 ###
 
 # CREATE CONVERSATION #
-PUT http://localhost:3000/profiles/2/conversations/3  HTTP/1.1
+PUT http://localhost:3000/user/2/conversation/3  HTTP/1.1
 Authorization: 2
 content-type: application/json
 
@@ -179,8 +189,19 @@ content-type: application/json
 
 ###
 
+# CREATE CONVERSATION #
+PUT http://localhost:3000/user/3/conversation/4  HTTP/1.1
+Authorization: 3
+content-type: application/json
+
+{
+    "message": "miao"
+}
+
+###
+
 #SEND MESSAGE#
-POST http://localhost:3000/profiles/2/conversations/3/messages  HTTP/1.1
+POST http://localhost:3000/user/2/conversation/3/messages  HTTP/1.1
 Authorization: 2
 content-type: application/json
 
@@ -191,7 +212,7 @@ content-type: application/json
 ###
 
 #SEND MESSAGE#
-POST http://localhost:3000/profiles/2/conversations/4/messages  HTTP/1.1
+POST http://localhost:3000/user/2/conversation/4/messages  HTTP/1.1
 Authorization: 2
 content-type: application/json
 
@@ -201,63 +222,63 @@ content-type: application/json
 ###
 
 #DELETE MESSAGE#
-DELETE http://localhost:3000/profiles/1/conversations/3/messages/1  HTTP/1.1
+DELETE http://localhost:3000/user/1/conversation/3/messages/1  HTTP/1.1
 Authorization: 1
 
 ###
 
 #DELETE MESSAGE#
-DELETE http://localhost:3000/profiles/1/conversations/4/messages/1  HTTP/1.1
+DELETE http://localhost:3000/user/1/conversation/4/messages/1  HTTP/1.1
 Authorization: 1
 
 ###
 
 #DELETE USER#
-DELETE http://localhost:3000/profiles/5  HTTP/1.1
+DELETE http://localhost:3000/user/5  HTTP/1.1
 Authorization: 5
 
 ###
 
 #SEARCH USER#
-GET http://localhost:3000/profiles?search=la HTTP/1.1
+GET http://localhost:3000/user?search=la HTTP/1.1
 Authorization: 1
 
 
 ###
 
 #SEARCH USER#
-GET http://localhost:3000/profiles?search=ca HTTP/1.1
+GET http://localhost:3000/user?search=ca HTTP/1.1
 Authorization: 1
 
 ###
 
 #GET CONVERSATIONS#
-GET http://localhost:3000/profiles/1/conversations/1
+GET http://localhost:3000/user/1/conversation/1
 Authorization:1
 
 ###
 
 #GET CONVERSATIONS#
-GET http://localhost:3000/profiles/1/conversations/3
+GET http://localhost:3000/user/1/conversation/3
 Authorization:1
 
 ###
 
 #GET CONVERSATIONS#
-GET http://localhost:3000/profiles/1/conversations
+GET http://localhost:3000/user/1/conversation
 Authorization:1
 
 ### 
 
 # FORWARD MESSAGE #
-POST http://localhost:3000/profiles/2/conversations/2/messages/1?dest=3 HTTP/1.1
+POST http://localhost:3000/user/2/conversation/2/messages/1?dest=3 HTTP/1.1
 Authorization: 2
 content-type: application/json
 
 ###
 
 # COMMENT MESSAGE # 
-PUT http://localhost:3000/profiles/2/conversations/3/messages/1/comments HTTP/1.1
+PUT http://localhost:3000/user/2/conversation/3/messages/1/comments HTTP/1.1
 Authorization: 2
 content-type: application/json
 
@@ -268,7 +289,7 @@ content-type: application/json
 ###
 
 #UNCOMMENT MESSAGE#
-DELETE http://localhost:3000/profiles/1/conversations/4/messages/1/comments/2 HTTP/1.1
+DELETE http://localhost:3000/user/1/conversation/4/messages/1/comments/2 HTTP/1.1
 Authorization: 1
 
 ###

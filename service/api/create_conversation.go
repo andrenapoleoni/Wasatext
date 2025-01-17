@@ -48,24 +48,45 @@ func (rt *_router) createConversation(w http.ResponseWriter, r *http.Request, ps
 		BadRequest(w, err, ctx, "Bad Request")
 		return
 	}
+	// check if user exists
+	exist, err := rt.db.ExistUserID(u2.UserID)
+	if err != nil {
+		InternalServerError(w, err, "Internal Server Error1", ctx)
+		return
+	}
+	if !exist {
+		http.Error(w, "User not found", http.StatusNotFound)
+		return
+	}
+
+	// check if conversation between users already exists
+	exist, err = rt.db.ExistConversation(userID, u2.UserID)
+	if err != nil {
+		InternalServerError(w, err, "Internal Server Error2", ctx)
+		return
+	}
+	if exist {
+		http.Error(w, "Conversation already exists", http.StatusConflict)
+		return
+	}
 
 	// create conversation
 	var c Conversation
 
 	c, err = rt.CreateConversationDB(c)
 	if err != nil {
-		InternalServerError(w, err, "Internal Server Error", ctx)
+		InternalServerError(w, err, "Internal Server Error3", ctx)
 		return
 	}
 	// add user to member private table
 	err = rt.db.AddMemberPrivate(c.ConversationID, userID)
 	if err != nil {
-		InternalServerError(w, err, "Internal Server Error", ctx)
+		InternalServerError(w, err, "Internal Server Error4", ctx)
 		return
 	}
 	err = rt.db.AddMemberPrivate(c.ConversationID, u2.UserID)
 	if err != nil {
-		InternalServerError(w, err, "Internal Server Error", ctx)
+		InternalServerError(w, err, "Internal Server Error5", ctx)
 		return
 	}
 
@@ -81,7 +102,7 @@ func (rt *_router) createConversation(w http.ResponseWriter, r *http.Request, ps
 	// send message
 	message, err = rt.CreateMessageDB(message)
 	if err != nil {
-		InternalServerError(w, err, "Internal Server Error", ctx)
+		InternalServerError(w, err, "Internal Server Error6", ctx)
 		return
 	}
 

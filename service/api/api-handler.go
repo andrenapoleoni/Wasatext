@@ -31,7 +31,7 @@ func (rt *_router) Handler() http.Handler {
 	// --------CREATE CONVERSATION------ //
 	rt.router.PUT("/user/:user/conversation/:conversation", rt.wrap(rt.createConversation, true))
 	// --------SEND MESSAGE------ //
-	rt.router.POST("/profiles/:user/conversation/:conversation/messages", rt.wrap(rt.sendMessage, true))
+	rt.router.POST("/user/:user/conversation/:conversation/messages", rt.wrap(rt.sendMessage, true))
 	// --------GET CONVERSATION------ //
 	rt.router.GET("/user/:user/conversation/:conversation", rt.wrap(rt.getConversation, true))
 	// --------GET CONVERSATIONS------ //

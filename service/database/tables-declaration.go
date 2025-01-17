@@ -17,7 +17,8 @@ var sql_MESSAGETABLE = ` CREATE TABLE IF NOT EXISTS Message
 	messageID INTEGER NOT NULL,
 	message TEXT NOT NULL,
 	TIMESTAMP DATETIME DEFAULT CURRENT_TIMESTAMP,
-	PRIMARY KEY(messageID)
+	PRIMARY KEY(messageID, conversationID)
+	
 );`
 
 // -------CONVERSATION TABLE------- //
@@ -73,7 +74,8 @@ var sql_COMMENTTABLE = ` CREATE TABLE IF NOT EXISTS Comment
 	commentTXT TEXT NOT NULL,
 	conversationID INTEGER NOT NULL,
 	userID INTEGER NOT NULL,
-	PRIMARY KEY(commentID),
-	FOREIGN KEY(messageID) REFERENCES Message(messageID) ON DELETE CASCADE
+	PRIMARY KEY(commentID)
+	FOREIGN KEY(messageID, conversationID) REFERENCES Message(messageID, conversationID) ON DELETE CASCADE
+	
 	
 );`
