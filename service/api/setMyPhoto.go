@@ -74,7 +74,7 @@ func (rt *_router) SetMyPhoto(w http.ResponseWriter, r *http.Request, ps httprou
 		return
 	}
 
-	//response
+	// response
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("content-type", "plain/text")
 	if err := json.NewEncoder(w).Encode("Photo changed"); err != nil {

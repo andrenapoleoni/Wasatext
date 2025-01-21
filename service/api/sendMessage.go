@@ -53,11 +53,25 @@ func (rt *_router) sendMessage(w http.ResponseWriter, r *http.Request, ps httpro
 		InternalServerError(w, err, "Internal Server Error", ctx)
 		return
 	}
-	// check if conversation is private
-	if conversation.GroupID == 0 {
-		conversation, err = rt.db.GetConversationPrivate(conversationID, userID)
+	//check if user is in conversation
+	if conversation.GroupID != 0 {
+		exist, err := rt.db.ExistUserInGroup(userID, conversation.GroupID)
 		if err != nil {
 			InternalServerError(w, err, "Internal Server Error", ctx)
+			return
+		}
+		if !exist {
+			Forbidden(w, err, ctx, "Forbidden")
+			return
+		}
+	} else {
+		exist, err := rt.db.ExistConversation(userID, conversationID)
+		if err != nil {
+			InternalServerError(w, err, "Internal Server Error", ctx)
+			return
+		}
+		if !exist {
+			Forbidden(w, err, ctx, "Forbidden")
 			return
 		}
 	}

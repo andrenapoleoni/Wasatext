@@ -40,6 +40,7 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.GET("/user/:user/conversation/:conversation", rt.wrap(rt.getConversation, true))
 	// --------GET CONVERSATIONS------ //
 	rt.router.GET("/user/:user/conversation", rt.wrap(rt.getMyConversations, true))
+
 	// Message routes
 	// --------FORWARD MESSAGE------ //
 	rt.router.POST("/user/:user/conversation/:conversation/messages/:message", rt.wrap(rt.forwardMessage, true))

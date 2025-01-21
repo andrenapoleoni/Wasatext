@@ -47,7 +47,7 @@ func (db *appdbimpl) GetListConversations(userID int) ([]Conversation, error) {
 			conversations = append(conversations, conversation)
 		}
 	}
-	//get conversation of private chat where user is member
+	// get conversation of private chat where user is member
 	rows, err = db.c.Query(query_GETLISTCONVERSATIONSBYUSER, userID)
 	if err != nil {
 		return conversations, err
@@ -58,9 +58,9 @@ func (db *appdbimpl) GetListConversations(userID int) ([]Conversation, error) {
 		if rows.Err() != nil {
 			return conversations, err
 		}
-
+		var gino int
 		var conversation Conversation
-		err = rows.Scan(&conversation.ConversationID, &conversation.GroupID)
+		err = rows.Scan(&conversation.ConversationID, &gino)
 		if err != nil {
 			return conversations, err
 		}

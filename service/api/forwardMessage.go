@@ -38,27 +38,27 @@ func (rt *_router) forwardMessage(w http.ResponseWriter, r *http.Request, ps htt
 		return
 	}
 
-	// check if conversation is a group or private chat
-	if conversation.GroupID == 0 {
-		// private chat
-		conversation, err = rt.db.GetConversationPrivate(ConversationID, userID)
+	// check if user is in conversation
+	if conversation.GroupID != 0 {
+		exist, err := rt.db.ExistUserInGroup(userID, conversation.GroupID)
 		if err != nil {
-			http.Error(w, "Not Found "+err.Error(), http.StatusNotFound)
-			return
-		}
-
-	} else {
-		// check if user is a member of group
-		exist, err := rt.db.ExistUserInGroup(conversation.GroupID, userID)
-		if err != nil {
-			Forbidden(w, err, ctx, "Forbidden")
+			InternalServerError(w, err, "Failed to check if user is in group", ctx)
 			return
 		}
 		if !exist {
-			Forbidden(w, err, ctx, "Forbidden")
+			Forbidden(w, err, ctx, "User is not in group")
 			return
 		}
-
+	} else {
+		exist, err := rt.db.ExistUserInConv(userID, conversation.ConversationID)
+		if err != nil {
+			InternalServerError(w, err, "Failed to check if user is in conversation", ctx)
+			return
+		}
+		if !exist {
+			Forbidden(w, err, ctx, "User is not in conversation")
+			return
+		}
 	}
 
 	// take message id from endpoint

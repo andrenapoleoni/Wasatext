@@ -42,6 +42,10 @@ type AppDatabase interface {
 
 	GetUserByName(username string) (User, error)
 
+	GetGroupByID(groupID int) (Group, error)
+
+	GetUserByID(userID int) (User, error)
+
 	ExistName(username string) (bool, error)
 
 	ChangeUsername(userID int, newUsername string) error
@@ -76,7 +80,9 @@ type AppDatabase interface {
 
 	AddMemberPrivate(conversationID int, userID int) error
 
-	GetConversationPrivate(conversationID int, userID int) (Conversation, error)
+	ExistUserInConv(userID int, conversationID int) (bool, error)
+
+	GetUserInConversationPrivate(conversationID int, userID int) (User, error)
 
 	GetMessage(conversationID int, messageID int) (Message, error)
 
