@@ -166,12 +166,7 @@ export default {
 
     
   },
-  /*created() {
-    // Fetch existing conversation if convID is valid
-    if (this.convID !== "null") {
-      this.getConversation();
-    }
-  },*/
+  
   mounted() {
     // Se l'utente non è loggato, reindirizza alla pagina di login
     if (!sessionStorage.token) {
