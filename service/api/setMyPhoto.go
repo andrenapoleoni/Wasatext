@@ -7,6 +7,7 @@ import (
 
 	"os"
 
+	"encoding/base64"
 	"encoding/json"
 
 	"myWasatext/service/api/utils"
@@ -51,6 +52,8 @@ func (rt *_router) SetMyPhoto(w http.ResponseWriter, r *http.Request, ps httprou
 		InternalServerError(w, err, "Error reading the image file", ctx)
 		return
 	}
+
+	response := base64.StdEncoding.EncodeToString(data)
 	// Check if the file is a jpeg
 	fileType := http.DetectContentType(data)
 	if fileType != "image/jpeg" {
@@ -74,10 +77,17 @@ func (rt *_router) SetMyPhoto(w http.ResponseWriter, r *http.Request, ps httprou
 		return
 	}
 
+	type Response struct {
+		Photo string `json:"photo"`
+	}
+
+	var res Response
+	res.Photo = response
+
 	// response
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("content-type", "plain/text")
-	if err := json.NewEncoder(w).Encode("Photo changed"); err != nil {
+	if err := json.NewEncoder(w).Encode(res); err != nil {
 		InternalServerError(w, err, "Error encoding the response", ctx)
 		return
 	}

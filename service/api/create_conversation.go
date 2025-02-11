@@ -109,4 +109,9 @@ func (rt *_router) createConversation(w http.ResponseWriter, r *http.Request, ps
 	// response
 	w.WriteHeader(http.StatusCreated)
 
+	w.Header().Set("content-type", "application/json")
+	if err := json.NewEncoder(w).Encode(c); err != nil {
+		InternalServerError(w, err, "Error encoding resposne", ctx)
+		return
+	}
 }

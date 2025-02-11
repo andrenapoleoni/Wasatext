@@ -82,7 +82,7 @@ content-type: application/json
 
 {
     "groupname": "ferrari",
-    "usernamelist" : [ "Balsamo", "lachilachete"]
+    "usernamelist" : [ "ludo", "lachi"]
         
     
 }
@@ -129,12 +129,12 @@ content-type: application/json
 
 ### 
 # ADD TO GROUP#
-POST http://localhost:3000/user/2/groups/2  HTTP/1.1
-Authorization: 2
+PUT  http://localhost:3000/user/1/groups/1  HTTP/1.1
+Authorization: 1
 content-type: application/json
 
 {
-    "username" :  "carro"
+    "username" :  "mattia"
         
     
 }
@@ -201,8 +201,8 @@ content-type: application/json
 ###
 
 #SEND MESSAGE#
-POST http://localhost:3000/user/2/conversation/3/messages  HTTP/1.1
-Authorization: 2
+POST http://localhost:3000/user/4/conversation/3/messages  HTTP/1.1
+Authorization: 4
 content-type: application/json
 
 {
@@ -212,12 +212,12 @@ content-type: application/json
 ###
 
 #SEND MESSAGE#
-POST http://localhost:3000/user/2/conversation/4/messages  HTTP/1.1
-Authorization: 2
+POST http://localhost:3000/user/1/conversation/3/messages  HTTP/1.1
+Authorization: 1
 content-type: application/json
 
 {
-    "message": "anvedi chi s'è fatto vivo!!"
+    "txt": "anvedi chi s'è fatto vivo!!"
 }
 ###
 

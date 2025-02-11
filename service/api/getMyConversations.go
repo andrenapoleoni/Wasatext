@@ -27,7 +27,7 @@ func (rt *_router) getMyConversations(w http.ResponseWriter, r *http.Request, ps
 	// get conversations
 	conversations, err := rt.db.GetListConversations(userID)
 	if err != nil {
-		InternalServerError(w, err, "Internal Server Error", ctx)
+		InternalServerError(w, err, "Internal Server Error1", ctx)
 		return
 	}
 	// convert from conv id to username or groupname
@@ -35,45 +35,69 @@ func (rt *_router) getMyConversations(w http.ResponseWriter, r *http.Request, ps
 		Conversation Conversation `json:"conversation"`
 		User         User         `json:"user"`
 		Group        Group        `json:"group"`
+		GroupUsers   []User       `json:"groupUsers"`
 		//Message      Message      `json:"message"`
 	}
 	// Response
 	response := make([]Response, len(conversations))
 
-	for i, conversationDB := range conversations {
-		if conversationDB.GroupID != 0 {
-			groupDB, err := rt.db.GetGroupByID(conversationDB.GroupID)
+	for i, conversations := range conversations {
+		if conversations.GroupID != 0 {
+			groupDB, err := rt.db.GetGroupByID(conversations.GroupID)
 			if err != nil {
-				InternalServerError(w, err, "Internal Server Errorbraerera", ctx)
+				InternalServerError(w, err, "Internal Server Error2", ctx)
 				return
 			}
 			var group Group
 			err = group.FromDatabase(groupDB)
 			if err != nil {
-				InternalServerError(w, err, "Internal Server Error", ctx)
+				InternalServerError(w, err, "Internal Server Error3", ctx)
 				return
+			}
+			//take all users in group
+			groupUsers, err := rt.db.GetUsersInGroup(conversations.GroupID)
+			if err != nil {
+				InternalServerError(w, err, "Internal Server Error4", ctx)
+				return
+			}
+			var groupUsersResponse []User
+			for i := 0; i < len(groupUsers); i++ {
+				userD, err := rt.db.GetUserByID(groupUsers[i])
+				if err != nil {
+					InternalServerError(w, err, "Internal Server Error5", ctx)
+					return
+				}
+				var user User
+				err = user.FromDatabase(userD)
+				if err != nil {
+					InternalServerError(w, err, "Internal Server Error6", ctx)
+					return
+				}
+
+				groupUsersResponse = append(groupUsersResponse, user)
 			}
 
 			response[i].Group = group
+			response[i].GroupUsers = groupUsersResponse
 		} else {
-			userDB, err := rt.db.GetUserInConversationPrivate(conversationDB.ConversationID, userID)
+			userDB, err := rt.db.GetUserInConversationPrivate(conversations.ConversationID, userID)
 			if err != nil {
-				InternalServerError(w, err, "Internal Server Errorrere", ctx)
+				InternalServerError(w, err, "Internal Server Error4", ctx)
 				return
 			}
 			var user User
 			err = user.FromDatabase(userDB)
 			if err != nil {
-				InternalServerError(w, err, "Internal Server Error", ctx)
+				InternalServerError(w, err, "Internal Server Error5", ctx)
 				return
 			}
 
 			response[i].User = user
 		}
 		var conversation Conversation
-		err = conversation.FromDatabase(conversationDB)
+		err = conversation.FromDatabase(conversations)
 		if err != nil {
-			InternalServerError(w, err, "Internal Server Error", ctx)
+			InternalServerError(w, err, "Internal Server Error6", ctx)
 			return
 		}
 
@@ -92,7 +116,7 @@ func (rt *_router) getMyConversations(w http.ResponseWriter, r *http.Request, ps
 	w.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(response)
 	if err != nil {
-		InternalServerError(w, err, "Internal Server Error", ctx)
+		InternalServerError(w, err, "Internal Server Error7", ctx)
 		return
 	}
 

@@ -9,7 +9,7 @@ type Message struct {
 	MessageID      int    `json:"messageID"`
 	ConversationID int    `json:"conversationID"`
 	UserID         int    `json:"userID"`
-	MessageTXT     string `json:"message"`
+	MessageTXT     string `json:"txt"`
 }
 
 // from database

@@ -64,7 +64,7 @@ paths:
     
     get:
       tags: [User] 
-      operationId: searchUsers
+      operationId: searchUser
       description: search an User 
       summary: user can search another users 
       security:

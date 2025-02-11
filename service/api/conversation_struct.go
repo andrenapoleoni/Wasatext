@@ -6,8 +6,8 @@ import (
 
 type Conversation struct {
 	ConversationID int `json:"conversationID"`
-	UserID         int `json:"userID"`
-	GroupID        int `json:"groupID"`
+
+	GroupID int `json:"groupID"`
 }
 
 func (c *Conversation) ToDatabase() database.Conversation {

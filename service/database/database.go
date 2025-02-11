@@ -100,6 +100,10 @@ type AppDatabase interface {
 
 	ExistComment(commentID int, messageID int) (bool, error)
 
+	GetAllMessage(conversationID int) ([]Message, error)
+
+	GetUsersInGroup(groupID int) ([]int, error)
+
 	Ping() error
 }
 

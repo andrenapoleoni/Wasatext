@@ -38,7 +38,7 @@ func (rt *_router) sendMessage(w http.ResponseWriter, r *http.Request, ps httpro
 	userID := ctx.UserID
 
 	if profileUserID != userID {
-		Forbidden(w, err, ctx, "Forbidden")
+		Forbidden(w, err, ctx, "auth problem")
 		return
 	}
 	// get conversation id
@@ -55,23 +55,23 @@ func (rt *_router) sendMessage(w http.ResponseWriter, r *http.Request, ps httpro
 	}
 	//check if user is in conversation
 	if conversation.GroupID != 0 {
-		exist, err := rt.db.ExistUserInGroup(userID, conversation.GroupID)
+		exist, err := rt.db.ExistUserInGroup(conversation.GroupID, userID)
 		if err != nil {
 			InternalServerError(w, err, "Internal Server Error", ctx)
 			return
 		}
 		if !exist {
-			Forbidden(w, err, ctx, "Forbidden")
+			Forbidden(w, err, ctx, "group not exist")
 			return
 		}
 	} else {
-		exist, err := rt.db.ExistConversation(userID, conversationID)
+		exist, err := rt.db.ExistUserInConv(userID, conversationID)
 		if err != nil {
 			InternalServerError(w, err, "Internal Server Error", ctx)
 			return
 		}
 		if !exist {
-			Forbidden(w, err, ctx, "Forbidden")
+			Forbidden(w, err, ctx, "user not exist")
 			return
 		}
 	}

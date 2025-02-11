@@ -33,3 +33,21 @@ func (db *appdbimpl) GetConversationIDfrom2Users(userID1 int, userID2 int) (Conv
 	return conversation, nil
 
 }
+
+func (db *appdbimpl) GetConversationIDfromGroup(groupID int) (Conversation, error) {
+	// get conversation from database
+	var conversation Conversation
+
+	err := db.c.QueryRow(`SELECT conversationID
+		FROM Conversation
+		WHERE groupID = ?;`, groupID).Scan(&conversation.ConversationID)
+
+	conversation.GroupID = groupID
+
+	if err != nil {
+		return conversation, err
+	}
+
+	return conversation, nil
+
+}

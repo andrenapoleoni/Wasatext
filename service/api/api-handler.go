@@ -21,9 +21,9 @@ func (rt *_router) Handler() http.Handler {
 
 	// Group routes
 	// --------CREATE GROUP------ //
-	rt.router.POST("/user/:user/groups", rt.wrap(rt.createGroup, true))
+	rt.router.POST("/user/:user/group", rt.wrap(rt.createGroup, true))
 	//  --------ADD TO GROUP------  //
-	rt.router.POST("/user/:user/groups/:group", rt.wrap(rt.addToGroup, true))
+	rt.router.PUT("/user/:user/groups/:group", rt.wrap(rt.addToGroup, true))
 	// --------LEAVE GROUP------ //
 	rt.router.DELETE("/user/:user/groups/:group", rt.wrap(rt.leaveGroup, true))
 	// --------SET GROUPNAME------ //

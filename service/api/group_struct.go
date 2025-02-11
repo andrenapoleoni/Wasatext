@@ -1,6 +1,7 @@
 package api
 
 import (
+	"myWasatext/service/api/utils"
 	"myWasatext/service/database"
 	"regexp"
 )
@@ -8,6 +9,7 @@ import (
 type Group struct {
 	GroupID int    `json:"groupID"`
 	Name    string `json:"groupname"`
+	Photo   string `json:"photo"`
 }
 
 func (g *Group) IsValid() bool {
@@ -26,6 +28,11 @@ func (g *Group) ToDatabase() database.Group {
 func (g *Group) FromDatabase(dbGroup database.Group) error {
 	g.GroupID = dbGroup.GroupID
 	g.Name = dbGroup.Name
+	profilephoto, err := utils.ImageToBase64(utils.GetGroupPhotoPath(dbGroup.GroupID))
+	if err != nil {
+		return err
+	}
+	g.Photo = profilephoto
 
 	return nil
 }

@@ -96,16 +96,46 @@ func (rt *_router) createGroup(w http.ResponseWriter, r *http.Request, ps httpro
 	// create conversation of group
 	var c Conversation
 	c.GroupID = group.GroupID
-
-	_, err = rt.CreateConversationDB(c)
+	type response struct {
+		Conversation Conversation `json:"conversation"`
+		GroupUsers   []User       `json:"groupUsers"`
+		Group        Group        `json:"group"`
+	}
+	// create conversation
+	c, err = rt.CreateConversationDB(c)
 	if err != nil {
 		InternalServerError(w, err, "can't create conversation", ctx)
 		return
 	}
+	var res response
+	res.Conversation = c
+	res.Group = group
+	// get all users in group
+	groupUsers, err := rt.db.GetUsersInGroup(group.GroupID)
+	if err != nil {
+		InternalServerError(w, err, "can't get users in group", ctx)
+		return
+	}
+	var groupUsersResponse []User
+	for i := 0; i < len(groupUsers); i++ {
+		userD, err := rt.db.GetUserByID(groupUsers[i])
+		if err != nil {
+			InternalServerError(w, err, "can't get user by id", ctx)
+			return
+		}
+		var user User
+		err = user.FromDatabase(userD)
+		if err != nil {
+			InternalServerError(w, err, "can't convert user from database", ctx)
+			return
+		}
+		groupUsersResponse = append(groupUsersResponse, user)
+	}
+	res.GroupUsers = groupUsersResponse
 
 	// response
 	w.Header().Set("content-type", "application/json")
-	if err := json.NewEncoder(w).Encode(group); err != nil {
+	if err := json.NewEncoder(w).Encode(res); err != nil {
 		InternalServerError(w, err, "can't encode response", ctx)
 		return
 	}

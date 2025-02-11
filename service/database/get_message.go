@@ -16,3 +16,25 @@ func (db *appdbimpl) GetMessage(conversationID int, messageID int) (Message, err
 	return message, nil
 
 }
+
+func (db *appdbimpl) GetAllMessage(conversationID int) ([]Message, error) {
+	// get all message from database
+	var messages []Message
+	rows, err := db.c.Query("SELECT messageID, message, userID FROM Message WHERE conversationID = ?;", conversationID)
+	if err != nil {
+		return messages, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var message Message
+		err := rows.Scan(&message.MessageID, &message.MessageTXT, &message.UserID)
+		if err != nil {
+			return messages, err
+		}
+		messages = append(messages, message)
+	}
+
+	return messages, nil
+
+}

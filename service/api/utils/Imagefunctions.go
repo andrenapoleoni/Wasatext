@@ -26,7 +26,7 @@ func ImageToBase64(filename string) (string, error) {
 
 // get path group photo
 func GetGroupPhotoPath(groupID int) string {
-	return fmt.Sprintf("./storage/groups/%d/group_photo.jpg", groupID)
+	return fmt.Sprintf("./storage/group/%d/group_photo.jpg", groupID)
 }
 
 // get path user photo
