@@ -167,12 +167,13 @@ export default {
         this.groupChatMembers.splice(index, 1);
       }
 },
+    
 
     
 },
   mounted() {
     if (!sessionStorage.token) {
-      this.$router.push("/login");
+      this.$router.push("/session");
       return;
     }
     this.getMyconversations();
@@ -198,9 +199,9 @@ export default {
         </div>
         <div class="btn-group me-2 position-relative" @click.stop>
           <button type="button" class="btn btn-sm btn-outline-primary" @click="toggleDropdown">New Chat</button>
-          <div v-if="showDropdown" class="dropdown-menu show dropdown-menu-end">
-            <button class="dropdown-item" @click="newGroupChat">New Group Chat</button>
-            <button class="dropdown-item" @click="newPrivateChat">New Private Chat</button>
+          <div v-if="showDropdown" class="dropd-menu show dropd-menu-end">
+            <button class="dropd-item" @click="newGroupChat">New Group Chat</button>
+            <button class="dropd-item" @click="newPrivateChat">New Private Chat</button>
           </div>
         </div>
       </div>
@@ -322,10 +323,11 @@ export default {
   position: relative;
 }
 
-.dropdown-menu {
+.dropd-menu {
   position: absolute;
   top: 100%;
   right: 0; 
+  left: auto;
   z-index: 1000;
   display: block;
   float: left;
@@ -341,7 +343,7 @@ export default {
   box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .175);
 }
 
-.dropdown-item {
+.dropd-item {
   display: block;
   width: 100%;
   padding: .25rem 1.5rem;
@@ -355,7 +357,7 @@ export default {
   cursor: pointer;
 }
 
-.dropdown-item:hover {
+.dropd-item:hover {
   color: #fff;
   background-color: #007bff;
 }

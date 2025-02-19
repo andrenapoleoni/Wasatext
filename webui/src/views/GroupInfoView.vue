@@ -57,6 +57,15 @@ export default{
                 console.log(error);
             }
         },
+        async leavegroup()
+        {
+            try{
+                await this.$axios.delete(`/user/${sessionStorage.userID}/groups/${this.groupId}`, { headers: { Authorization: sessionStorage.token } });
+                this.$router.push('/home');
+            }catch(e){
+                alert("Error leaving group: " + e.toString());
+            }
+        },
     }
 }
 
@@ -92,6 +101,11 @@ export default{
                 <button class="btn btn-primary" @click="updateGroupName">Change Group Name</button>
             </div>
         </div>
+        <div class="row">
+            <div class="col-12">
+                <button class="btn btn-danger" @click="leavegroup">Leave Group</button>
+            </div>
+            </div>  
     </div>
     
     

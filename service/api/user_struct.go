@@ -16,9 +16,10 @@ func (u *User) IsValid() bool {
 	username := u.Username
 	validUser := regexp.MustCompile(`^.*?$`)
 	// check if lenght of username is more than 3 and less than 16
-	/*if len(username) < 3 || len(username) > 16 {
-		return false
-	}*/
+	/*
+		if len(username) < 3 || len(username) > 16 {
+			return false
+		}*/
 
 	return validUser.MatchString(username)
 }

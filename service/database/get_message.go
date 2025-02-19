@@ -32,6 +32,9 @@ func (db *appdbimpl) GetAllMessage(conversationID int) ([]Message, error) {
 		if err != nil {
 			return messages, err
 		}
+		if rows.Err() != nil {
+			return messages, err
+		}
 		messages = append(messages, message)
 	}
 

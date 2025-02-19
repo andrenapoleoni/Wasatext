@@ -15,6 +15,9 @@ func (db *appdbimpl) GetUsersInGroup(groupID int) ([]int, error) {
 		if err != nil {
 			return nil, err
 		}
+		if rows.Err() != nil {
+			return users, err
+		}
 		users = append(users, user)
 	}
 	return users, nil

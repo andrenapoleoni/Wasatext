@@ -22,6 +22,9 @@ func (db *appdbimpl) SearchUser(usersearch string) ([]User, error) {
 		if err != nil {
 			return nil, err
 		}
+		if rows.Err() != nil {
+			return users, err
+		}
 		users = append(users, user)
 	}
 

@@ -104,6 +104,8 @@ type AppDatabase interface {
 
 	GetUsersInGroup(groupID int) ([]int, error)
 
+	ExistConversationByID(conversationID int) (bool, error)
+
 	Ping() error
 }
 

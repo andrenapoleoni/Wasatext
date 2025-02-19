@@ -18,6 +18,9 @@ func (db *appdbimpl) GetListConversations(userID int) ([]Conversation, error) {
 		if err != nil {
 			return nil, err
 		}
+		if rows.Err() != nil {
+			return conversations, err
+		}
 
 		conversation, err = db.GetConversation(conversation.ConversationID)
 		if err != nil {
@@ -27,7 +30,7 @@ func (db *appdbimpl) GetListConversations(userID int) ([]Conversation, error) {
 		conversations = append(conversations, conversation)
 	}
 
-	//get conversation of user by groupmember table
+	// get conversation of user by groupmember table
 	rows, err = db.c.Query(query_GETGROUPIDWHEREUSERISMEMBER, userID)
 	if err != nil {
 		return nil, err
@@ -40,6 +43,10 @@ func (db *appdbimpl) GetListConversations(userID int) ([]Conversation, error) {
 		err := rows.Scan(&conversation.GroupID)
 		if err != nil {
 			return nil, err
+		}
+
+		if rows.Err() != nil {
+			return conversations, err
 		}
 
 		conversation, err = db.GetConversationIDfromGroup(conversation.GroupID)

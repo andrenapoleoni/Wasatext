@@ -17,7 +17,7 @@ export default {
       showModal: false,
       searchTerm: "",
       searchResults: [],
-
+      dropdownIndex: null,
 
     };
   },
@@ -40,7 +40,7 @@ export default {
             { headers: { Authorization: sessionStorage.token } }
           );
           console.log("Message sent:", this.newMessage);
-          // Append the message locally
+          
           
 
           this.newMessage = ""; // Clear the input field
@@ -59,7 +59,7 @@ export default {
           { headers: { Authorization: sessionStorage.token } }
         );
         this.convID = response.data.conversationID; // Update convID with the backend value
-        // Append the message locally
+        
         
 
         this.newMessage = ""; // Clear the input field
@@ -80,7 +80,8 @@ export default {
             `/user/${sessionStorage.userID}/conversation/${this.convID}`,
             { headers: { Authorization: sessionStorage.token } }
           );
-          this.messages = response.data;
+          this.messages = response.data.messages;
+          this.groupMembers = response.data.memberlist;
           console.log("Messages:", this.messages);
           console.log("username:", this.userToSend);
         }
@@ -121,6 +122,15 @@ export default {
         this.sendMessage(); // Send the message after ensuring the conversation exists
       }
     },
+
+    toggleDropdown(index) {
+      console.log("Index:", index);
+      if (this.dropdownIndex === index) {
+    this.dropdownIndex = null; // Chiude il dropdown se è già aperto
+  } else {
+    this.dropdownIndex = index; // Apre il dropdown per il messaggio cliccato
+  }
+  },
 
     opendModal()
     {
@@ -163,6 +173,18 @@ export default {
         this.$router.push('/group');
       }
     },
+    async deleteMessage(msg) {
+      console.log("ID del messaggio da eliminare:", msg.messageID, "msg:", msg);
+      try {
+        await this.$axios.delete(`/user/${sessionStorage.userID}/conversation/${this.convID}/messages/${msg.message.messageID}`, {
+          headers: { 'Authorization': sessionStorage.token }
+        });
+        this.getConversation();
+      } catch (e) {
+        alert("Error deleting message: " + e.toString());
+      }
+    },
+    
 
     
   },
@@ -237,6 +259,7 @@ export default {
     v-for="(msg, index) in messages"
     :key="index"
     :class="msg.user?.username === owner ? 'message-out' : 'message-in'"
+    @click="toggleDropdown(index)"
   >
     <!-- Mostra il nome dell'utente solo se il messaggio è ricevuto e la chat è di gruppo -->
     <template v-if="Number(groupId) !== 0 && msg.user?.username !== owner">
@@ -244,6 +267,14 @@ export default {
     </template>
 
     {{ msg.message.txt }}
+
+     <!-- Dropdown -->
+     <div v-if="dropdownIndex === index" class="dropdown-menu">
+      <button v-if="msg.user?.username === owner" @click="deleteMessage(msg)">🗑️ Cancella</button>
+      <button v-if="msg.user?.username === owner" @click="forwardMessage(msg)">📨 Inoltra</button>
+      <button v-if="msg.user?.username !== owner" @click="commentMessage(msg)">💬 Commenta</button>
+      <button v-if="msg.user?.username !== owner" @click="forwardMessage(msg)">📨 Inoltra</button>
+    </div>
   </div>
 </div>
 
@@ -289,6 +320,7 @@ export default {
 }
 
 .message-in {
+  position: relative;
   align-self: flex-start;
   margin: 5px 0;
   background: #e9ecef;
@@ -299,6 +331,7 @@ export default {
 }
 
 .message-out {
+  position: relative;
   align-self: flex-end;
   margin: 5px 0;
   background: #000000;
@@ -455,6 +488,50 @@ export default {
   padding: 10px;
   border-radius: 5px;
   cursor: pointer;
+
+}
+.dropdown-menu {
+  display: block;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 120px;
+  background: white;
+  border: 2px solid red;
+  
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+  z-index: 10;
+  
+ 
+ 
+}
+.dropdown-menu button {
+  background: none;
+  border: none;
+  padding: 5px;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+}
+
+.dropdown-menu button:hover {
+  background: #f0f0f0;
+}
+
+.message-in .dropdown-menu,
+.message-out .dropdown-menu {
+  right: 0;
+}
+
+.message-out .dropdown-menu {
+  left: auto;
+  right: 0;
+}
+
+.message-in .dropdown-menu {
+  left: 0;
+  right: auto;
 }
 
 

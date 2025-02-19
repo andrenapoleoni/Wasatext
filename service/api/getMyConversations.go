@@ -36,7 +36,7 @@ func (rt *_router) getMyConversations(w http.ResponseWriter, r *http.Request, ps
 		User         User         `json:"user"`
 		Group        Group        `json:"group"`
 		GroupUsers   []User       `json:"groupUsers"`
-		//Message      Message      `json:"message"`
+		// Message      Message      `json:"message"`
 	}
 	// Response
 	response := make([]Response, len(conversations))
@@ -54,7 +54,7 @@ func (rt *_router) getMyConversations(w http.ResponseWriter, r *http.Request, ps
 				InternalServerError(w, err, "Internal Server Error3", ctx)
 				return
 			}
-			//take all users in group
+			// take all users in group
 			groupUsers, err := rt.db.GetUsersInGroup(conversations.GroupID)
 			if err != nil {
 				InternalServerError(w, err, "Internal Server Error4", ctx)
@@ -103,12 +103,14 @@ func (rt *_router) getMyConversations(w http.ResponseWriter, r *http.Request, ps
 
 		response[i].Conversation = conversation
 
-		/*message, err := rt.db.GetLastMessage(conversation.ConversationID)
-		if err != nil {
-			InternalServerError(w, err, "Internal Server Error", ctx)
-			return
-		}
-		response[i].Message = message*/
+		/*
+			 message, err := rt.db.GetLastMessage(conversation.ConversationID)
+			if err != nil {
+				InternalServerError(w, err, "Internal Server Error", ctx)
+				return
+			}
+			response[i].Message = message
+		*/
 	}
 
 	// return conversations

@@ -33,6 +33,48 @@ func (rt *_router) getConversation(w http.ResponseWriter, r *http.Request, ps ht
 	}
 
 	// check if conversation exists
+	exist, err := rt.db.ExistConversationByID(conversationID)
+	if err != nil {
+		InternalServerError(w, err, "Internal Server Error", ctx)
+		return
+	}
+	if !exist {
+		http.Error(w, "Not Found", http.StatusNotFound)
+		return
+	}
+
+	var membergroup []User
+	// get conversation to check if groupId !=0
+	conversation, err := rt.db.GetConversation(conversationID)
+	if err != nil {
+		InternalServerError(w, err, "Internal Server Error", ctx)
+		return
+	}
+	if conversation.GroupID != 0 {
+		allusers, err := rt.db.GetMemberGroup(conversation.GroupID)
+
+		if err != nil {
+			InternalServerError(w, err, "can't get the list of users", ctx)
+			return
+		}
+		for _, u := range allusers {
+			usDB, err := rt.db.GetUserByID(u)
+			if err != nil {
+				InternalServerError(w, err, "can't get the user", ctx)
+				return
+			}
+			var us User
+			err = us.FromDatabase(usDB)
+			if err != nil {
+				InternalServerError(w, err, "can't get the user", ctx)
+				return
+			}
+
+			membergroup = append(membergroup, us)
+
+		}
+
+	}
 
 	// get messages of conversation
 	messageDB, err := rt.db.GetAllMessage(conversationID)
@@ -44,6 +86,11 @@ func (rt *_router) getConversation(w http.ResponseWriter, r *http.Request, ps ht
 	type MessageResponse struct {
 		MessageR Message `json:"message"`
 		UserR    User    `json:"user"`
+	}
+
+	type MessageListResponse struct {
+		Messages   []MessageResponse `json:"messages"`
+		MemberList []User            `json:"memberlist"`
 	}
 
 	response := make([]MessageResponse, len(messageDB))
@@ -71,10 +118,15 @@ func (rt *_router) getConversation(w http.ResponseWriter, r *http.Request, ps ht
 
 		response[i] = rsp
 	}
+
+	finalResponse := MessageListResponse{
+		Messages:   response,
+		MemberList: membergroup,
+	}
 	// return
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(response)
+	err = json.NewEncoder(w).Encode(finalResponse)
 	if err != nil {
 		InternalServerError(w, err, "Internal Server Error", ctx)
 		return

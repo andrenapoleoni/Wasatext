@@ -19,7 +19,10 @@ export default {
   methods: {
 	logout() {
 	  sessionStorage.clear();
-	  this.$router.push("/");
+	  this.$router.push("/session").then(() => {
+		window.location.reload();
+	  });
+	  
 	},
 	handleLoginSuccess() {
       this.isLoggedIn = true;
@@ -73,6 +76,14 @@ export default {
 				<a class="nav-link active" href="#" @click.prevent="goHome">
 				  <span data-feather="home"></span>
 				  HOME
+				</a>
+			  </li>
+			</ul>
+			<ul class = "nav flex-column">
+			  <li class="nav-item">
+				<a class="nav-link" href="#" @click.prevent="logout">
+				  <span data-feather="log-out"></span>
+				  LOGOUT
 				</a>
 			  </li>
 			</ul>

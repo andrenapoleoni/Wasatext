@@ -53,7 +53,7 @@ func (rt *_router) sendMessage(w http.ResponseWriter, r *http.Request, ps httpro
 		InternalServerError(w, err, "Internal Server Error", ctx)
 		return
 	}
-	//check if user is in conversation
+	// check if user is in conversation
 	if conversation.GroupID != 0 {
 		exist, err := rt.db.ExistUserInGroup(conversation.GroupID, userID)
 		if err != nil {
