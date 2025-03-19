@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"myWasatext/service/api/reqcontext"
 
@@ -10,7 +11,20 @@ import (
 )
 
 func (rt *_router) searchUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
+	// check  auth
+	profileUserID, err := strconv.Atoi(ps.ByName("user"))
+	if err != nil {
+		BadRequest(w, err, ctx, "Bad Request")
+		return
+	}
 
+	userID := ctx.UserID
+
+	// check authorization
+	if profileUserID != userID {
+		Forbidden(w, err, ctx, "Forbidden")
+		return
+	}
 	// get search string from request
 	search := r.URL.Query().Get("search")
 	if search == "" {

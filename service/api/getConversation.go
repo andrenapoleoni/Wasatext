@@ -82,10 +82,15 @@ func (rt *_router) getConversation(w http.ResponseWriter, r *http.Request, ps ht
 		InternalServerError(w, err, "Internal Server Error", ctx)
 		return
 	}
+	type CommentR struct {
+		CommentTXT string `json:"commentTXT"`
+		Username   string `json:"username"`
+	}
 
 	type MessageResponse struct {
-		MessageR Message `json:"message"`
-		UserR    User    `json:"user"`
+		MessageR    Message    `json:"message"`
+		UserR       User       `json:"user"`
+		CommentResp []CommentR `json:"comment"`
 	}
 
 	type MessageListResponse struct {
@@ -113,6 +118,27 @@ func (rt *_router) getConversation(w http.ResponseWriter, r *http.Request, ps ht
 			InternalServerError(w, err, "Internal Server Error", ctx)
 			return
 		}
+		var Comments []CommentR
+		commentsDB, err := rt.db.GetComments(message.MessageID)
+		if err != nil {
+			InternalServerError(w, err, "Internal Server Error", ctx)
+			return
+		}
+
+		for _, comment := range commentsDB {
+			var CommentR CommentR
+			CommentR.CommentTXT = comment.CommentTXT
+
+			userDB, err := rt.db.GetUserByID(comment.UserID)
+			if err != nil {
+				InternalServerError(w, err, "Internal Server Error", ctx)
+				return
+			}
+			CommentR.Username = userDB.Username
+
+			Comments = append(Comments, CommentR)
+		}
+		rsp.CommentResp = Comments
 		rsp.MessageR = msg
 		rsp.UserR = user
 

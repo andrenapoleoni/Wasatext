@@ -1,5 +1,9 @@
+
 <script>
-export default {
+
+import Reaction from "../components/ReactionModal.vue";
+
+export default{ 
   data() {
     return {
       owner: sessionStorage.username,
@@ -18,11 +22,14 @@ export default {
       searchTerm: "",
       searchResults: [],
       dropdownIndex: null,
+      modalReaction: false,
+      selectedMessage: null,
 
     };
   },
   methods: {
     async sendMessage() {
+        if (this.newMessage=="") throw "impossible send an empty message"
       
         try {
           // Send the message to the server
@@ -72,6 +79,9 @@ export default {
         throw e;
       }
     },
+
+    
+
 
     async getConversation() {
       try {
@@ -137,6 +147,11 @@ export default {
       this.showModal = true;
     },
 
+    toggleModal()
+    {
+      this.showModal=false;
+    },
+
     async searchUsers() {
       if (!this.searchTerm) {
         this.searchResults = [];
@@ -144,7 +159,7 @@ export default {
       }
 
       try {
-        const response = await this.$axios.get(`/user`, {
+        const response = await this.$axios.get(`/user/${sessionStorage.userID}`, {
           params: { search: this.searchTerm },
           headers: { 'Authorization': sessionStorage.token }
         });
@@ -184,6 +199,15 @@ export default {
         alert("Error deleting message: " + e.toString());
       }
     },
+    showModalReaction(msg) {
+      console.log("msg", msg.message)
+      this.selectedMessage= msg.message;
+      console.log("Selected message:", this.selectedMessage);
+  
+      this.modalReaction=!this.modalReaction;
+    },
+
+  
     
 
     
@@ -201,6 +225,8 @@ export default {
     this.getConversation();
     
   },
+
+  components: {Reaction}
 };
 </script>
 
@@ -267,12 +293,18 @@ export default {
     </template>
 
     {{ msg.message.txt }}
+    <div v-if="msg.comment && msg.comment.length">
+      <div v-for="comment in msg.comment" :key="comment.username">
+  {{ comment.commentTXT }} - {{ comment.username }}
+</div>
+</div>
+     
 
      <!-- Dropdown -->
      <div v-if="dropdownIndex === index" class="dropdown-menu">
       <button v-if="msg.user?.username === owner" @click="deleteMessage(msg)">🗑️ Cancella</button>
       <button v-if="msg.user?.username === owner" @click="forwardMessage(msg)">📨 Inoltra</button>
-      <button v-if="msg.user?.username !== owner" @click="commentMessage(msg)">💬 Commenta</button>
+      <button v-if="msg.user?.username !== owner" @click="showModalReaction(msg)">💬 Commenta</button>
       <button v-if="msg.user?.username !== owner" @click="forwardMessage(msg)">📨 Inoltra</button>
     </div>
   </div>
@@ -288,6 +320,13 @@ export default {
       />
       <button @click="check">Send</button>
     </div>
+
+
+    <Reaction :show="modalReaction" @close="showModalReaction" :msg="selectedMessage">
+      <template v-slot:header>
+        <h3>Choose an emoji</h3>
+      </template>
+    </Reaction>
   
 </template>
 
@@ -391,7 +430,7 @@ export default {
 
 .add-button {
   margin-left: 1000px; /* Spinge il bottone a destra */
-  background: #28a745;
+  background: #043eed;
   color: white;
   border: none;
   padding: 8px 15px;

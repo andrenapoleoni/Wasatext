@@ -1,4 +1,8 @@
 <script>
+
+import Group from "../components/GroupModal.vue";
+import Private from "../components/PrivateModal.vue";
+
 export default {
   data: function() {
     return {
@@ -6,16 +10,13 @@ export default {
       ownerID: sessionStorage.userID,   
       errormsg: null,
       some_data: [],
-      showDropdown: false,
-      showPrivateChatModal: false,
-      privateChatUserId: "", // Selected user ID
       searchTerm: "",
       searchResults: [],
       existingChatWarning: "",
-      selectedUserId: null, // Track the selected user
       showGroupChatModal: false,
       groupChatMembers: [],
-      groupName: "",
+      showPrivateChatModal: false,
+      showDropdown: false,
 
     };
   },
@@ -41,136 +42,43 @@ export default {
 
     handleConversationClick(response) {
       localStorage.clear();
-    console.log("Conversation ID cliccato:", response.conversation.conversationID);
-    console.log("Username cliccato:", response.user.username);
-    console.log("Group ID cliccato:", response.group.groupID);
-    console.log("Group name cliccato:", response.group.groupname);
-    console.log("Group participants cliccato:", response.groupUsers);
+      console.log("Conversation ID cliccato:", response.conversation.conversationID);
+      console.log("Username cliccato:", response.user.username);
+      console.log("Group ID cliccato:", response.group.groupID);
+      console.log("Group name cliccato:", response.group.groupname);
+      console.log("Group participants cliccato:", response.groupUsers);
     if (response.group.groupID!==0) {
       console.log("Group chat:", response.group.groupname);
       localStorage.groupname = response.group.groupname;
       localStorage.groupId = response.group.groupID;
       localStorage.groupMembers = JSON.stringify(response.groupUsers);
       localStorage.photo = response.group.photo;
-
-
-     
     }else {
       console.log("Private chat:", response.user.username);
-      
       localStorage.groupId = 0;
       localStorage.username = response.user.username;
       localStorage.photo = response.user.photo;
-      
     }
     this.$router.push(`/conversation/${response.conversation.conversationID}`);
   },
-  toggleDropdown(event) {
+  
+   
+    handleCreatePrivateChatModalToggle() {
+      console.log("Create private chat",this.some_data);
+      this.showPrivateChatModal = !this.showPrivateChatModal;
+    },
+    handleCreateGroupModalToggle() {
+      this.showGroupChatModal = !this.showGroupChatModal;
+   
+    },
+    toggleDropdown(){
       this.showDropdown = !this.showDropdown;
-      if (this.showDropdown) {
-        event.stopPropagation();
-      }
-    },
-  closeDropdown() {
-      this.showDropdown = false;
-    },
-    newGroupChat() {
-      this.showGroupChatModal = true;
-      this.searchTerm = "";
-      this.groupName = "";
-      this.searchResults = [];
-      this.groupChatMembers = [];
-      
-    },
-    newPrivateChat() {
-      this.showPrivateChatModal = true;
-      this.searchTerm = ""; // Clear search term when opening modal
-      this.searchResults = []; // Clear previous search results
-      this.selectedUserId = null; // Reset selected user
-    },
-    async startPrivateChat() {
-      
-      const existingChat = this.some_data.find(chat => {
-          // Verifica che "chat.participants" sia un array valido prima di usare includes
-          return Array.isArray(chat.participants) && chat.participants.includes(this.privateChatUserId);
-        });
-      
-      localStorage.groupname = null;
-      localStorage.groupId = 0;
-      localStorage.userID=this.selectedUserId;
-      
-      localStorage.username=this.searchResults.find(user => user.userID === this.selectedUserId).username;
-      localStorage.photo=this.searchResults.find(user => user.userID === this.selectedUserId).photo;
-      if (existingChat) {
-        // Redirect to the existing chat
-        this.$router.push(`/conversation/${existingChat.conversation.conversationID}`);
-      } else {
-        // Open a new chat view without creating a conversation yet
-        this.$router.push(`/conversation/null`);
-      }
-    },
-
-  async startGroupChat() {
-      if (this.groupChatMembers.length === 0) {
-        alert("Seleziona almeno un utente per avviare la chat di gruppo.");
-        return;
-      }
-
-      const members = this.groupChatMembers.map(user => user.username);
-      localStorage.setItem("groupMembers", JSON.stringify(members)); // Salviamo gli ID nel localStorage
-      console.log("Creating group chat as user:", sessionStorage.userID);
-      console.log("Participants:", members);
-      let response = await this.$axios.post(`/user/${sessionStorage.userID}/group`, {
-        groupname: this.groupName,
-        usernamelist: members
-      }, {
-        headers: { 'Authorization': sessionStorage.token }
-      });
-      console.log("Group chat created:", response.data);
-      let conviID= response.data.conversation.conversationID;
-      localStorage.groupname = this.groupName;
-      localStorage.groupId = response.data.conversation.groupID;
-      localStorage.groupMembers = JSON.stringify(response.data.groupUsers);
-      localStorage.photo = response.data.group.photo;
-      this.$router.push(`/conversation/${conviID}`);
-  },
-    closeModal() {
-      this.showPrivateChatModal = false;
-    },
-    async searchUsers() {
-      if (!this.searchTerm) {
-        this.searchResults = [];
-        return;
-      }
-
-      try {
-        const response = await this.$axios.get(`/user`, {
-          params: { search: this.searchTerm },
-          headers: { 'Authorization': sessionStorage.token }
-        });
-
-        this.searchResults = response.data;
-      } catch (e) {
-        this.errormsg = e.toString();
-      }
-    },
-    selectUser(user) {
-      this.privateChatUserId = user.userID; // Set user ID for the chat
-      this.selectedUserId = user.userID; // Highlight the selected user
-    },
-
-    selectGroupUser(user) {
-      const index = this.groupChatMembers.findIndex(u => u.username === user.username);
-      if (index === -1) {
-      this.groupChatMembers.push(user);
-      } else {
-        this.groupChatMembers.splice(index, 1);
-      }
+    }
 },
     
 
     
-},
+
   mounted() {
     if (!sessionStorage.token) {
       this.$router.push("/session");
@@ -181,7 +89,8 @@ export default {
   },
   beforeUnmount() {
     document.removeEventListener("click", this.closeDropdown);
-  }
+  },
+  components: {Group,Private},
 
 };
 
@@ -200,12 +109,13 @@ export default {
         <div class="btn-group me-2 position-relative" @click.stop>
           <button type="button" class="btn btn-sm btn-outline-primary" @click="toggleDropdown">New Chat</button>
           <div v-if="showDropdown" class="dropd-menu show dropd-menu-end">
-            <button class="dropd-item" @click="newGroupChat">New Group Chat</button>
-            <button class="dropd-item" @click="newPrivateChat">New Private Chat</button>
+            <button class="dropd-item" @click="handleCreateGroupModalToggle">New Group Chat</button>
+            <button class="dropd-item" @click="handleCreatePrivateChatModalToggle">New Private Chat</button>
           </div>
         </div>
       </div>
     </div>
+
 
     <!-- Error message -->
     <ErrorMsg v-if="errormsg" :msg="errormsg"></ErrorMsg>
@@ -215,40 +125,7 @@ export default {
       {{ existingChatWarning }}
     </div>
 
-    <!-- Modal for private chat -->
-    <div v-if="showPrivateChatModal" class="modal-overlay">
-      <div class="modal-content">
-        <h3>Start Private Chat</h3>
-
-        <!-- Search bar for user search -->
-        <input
-          type="text"
-          v-model="searchTerm"
-          placeholder="Search for a user"
-          class="form-control mb-3"
-          @input="searchUsers"
-        />
-
-        <!-- List of matching users -->
-        <ul class="list-group">
-          <li
-            v-for="user in searchResults.filter(u => u.username !== owner)"
-            :key="user.id"
-            class="list-group-item"
-            :class="{ 'selected-user': user.userID === selectedUserId }"
-            @click="selectUser(user)"
-          >
-            {{ user.username }}
-          </li>
-        </ul>
-
-        <div class="modal-actions">
-          <button class="btn btn-primary" @click="startPrivateChat">Start chat</button>
-          <button class="btn btn-secondary" @click="closeModal">Cancel</button>
-        </div>
-      </div>
-    </div>
-
+    
     <div 
   class="conversations" 
   v-for="response in some_data" 
@@ -265,55 +142,21 @@ export default {
   <hr>
 </div>
   </div>
- <!-- Modale per la chat di gruppo -->
-<div v-if="showGroupChatModal" class="modal-overlay">
-  <div class="modal-content">
-    <h3>Create Group Chat</h3>
+   <!-- Modale utilizzato per la creazione di un nuovo gruppo -->
+   <Group :show="showGroupChatModal" @close="handleCreateGroupModalToggle" title="search">
+        <template v-slot:header>
+          <h3>Select users</h3>
+        </template>
+      </Group>
 
-    <!-- Input per il nome del gruppo -->
-    <input
-      type="text"
-      v-model="groupName"
-      placeholder="Enter group name"
-      class="form-control mb-3"
-    />
+      <!-- Modal for private chat -->
+    <Private :show="showPrivateChatModal" @close="handleCreatePrivateChatModalToggle" title="search" :somedata="some_data">
+    <template v-slot:header>
+          <h3>Select users</h3>
+        </template>
+      </Private>
 
-    <!-- Mostra gli utenti selezionati -->
-    <div v-if="groupChatMembers.length" class="selected-users">
-      <span v-for="user in groupChatMembers" :key="user.userID" class="selected-user">
-        {{ user.username }}
-        <span class="remove-user" @click="selectGroupUser(user)">✖</span>
-      </span>
-    </div>
-
-    <!-- Barra di ricerca per aggiungere altri utenti -->
-    <input
-      type="text"
-      v-model="searchTerm"
-      placeholder="Search for users"
-      class="form-control mb-3"
-      @input="searchUsers"
-    />
-
-    <!-- Lista utenti trovati -->
-    <ul class="list-group">
-      <li
-        v-for="user in searchResults.filter(u => u.username !== owner)"
-        :key="user.userID"
-        class="list-group-item"
-        :class="{ 'selected-user': groupChatMembers.some(u => u.userID === user.userID) }"
-        @click="selectGroupUser(user)"
-      >
-        {{ user.username }}
-      </li>
-    </ul>
-
-    <div class="modal-actions">
-      <button class="btn btn-primary" @click="startGroupChat">Start Group Chat</button>
-      <button class="btn btn-secondary" @click="showGroupChatModal = false">Cancel</button>
-    </div>
-  </div>
-</div>
+  
 
 
 </template>
@@ -420,7 +263,7 @@ export default {
 }
 
 .selected-user {
-  background-color: #007bff;
+  background-color: #1973d3;
   color: white;
   padding: 5px 10px;
   border-radius: 15px;

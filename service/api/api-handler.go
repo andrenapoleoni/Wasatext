@@ -15,7 +15,7 @@ func (rt *_router) Handler() http.Handler {
 	//	--------DELETE USER------	//
 	rt.router.DELETE("/user/:user", rt.wrap(rt.DeleteUser, true))
 	//	--------SEARCH USER------	//
-	rt.router.GET("/user", rt.wrap(rt.searchUser, true))
+	rt.router.GET("/user/:user", rt.wrap(rt.searchUser, true))
 	//	--------SET PHOTO------	//
 	rt.router.PUT("/user/:user/photo", rt.wrap(rt.SetMyPhoto, true))
 
