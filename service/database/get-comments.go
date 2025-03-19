@@ -1,11 +1,11 @@
 package database
 
-var query_GETCOMMENTS = `SELECT commentID, commentTXT, userID FROM Comment WHERE messageID = ?;`
+var query_GETCOMMENTS = `SELECT commentID, commentTXT, userID FROM Comment WHERE (messageID,conversationID)=(?,?);`
 
-func (db *appdbimpl) GetComments(messageID int) ([]Comment, error) {
+func (db *appdbimpl) GetComments(messageID int, conversationID int) ([]Comment, error) {
 	// get all comments from database
 	var comments []Comment
-	rows, err := db.c.Query(query_GETCOMMENTS, messageID)
+	rows, err := db.c.Query(query_GETCOMMENTS, messageID, conversationID)
 	if err != nil {
 		return comments, err
 	}

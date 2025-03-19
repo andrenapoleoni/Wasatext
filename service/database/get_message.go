@@ -35,6 +35,7 @@ func (db *appdbimpl) GetAllMessage(conversationID int) ([]Message, error) {
 		if rows.Err() != nil {
 			return messages, err
 		}
+		message.ConversationID = conversationID
 		messages = append(messages, message)
 	}
 

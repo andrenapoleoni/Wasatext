@@ -84,13 +84,56 @@ func (rt *_router) commentMessage(w http.ResponseWriter, r *http.Request, ps htt
 		BadRequest(w, err, ctx, "Bad Request")
 		return
 	}
+	// check if user is in conversation
+	// private conversation
+	if conversation.GroupID == 0 {
+		exist, err := rt.db.ExistUserInConv(userID, conversation.ConversationID)
+		if err != nil {
+			InternalServerError(w, err, "Internal Server Error", ctx)
+			return
+		}
+		if !exist {
+			Forbidden(w, err, ctx, "Forbidden")
+			return
+		}
+	} else {
+		// group conversation
+		exist, err := rt.db.ExistUserInGroup(conversation.GroupID, userID)
+		if err != nil {
+			InternalServerError(w, err, "Internal Server Error", ctx)
+			return
+		}
+		if !exist {
+			Forbidden(w, err, ctx, "Forbidden")
+			return
+		}
+	}
 
-	// create comment
-	comment, err = rt.CreateCommentDB(comment)
+	// check if user already commented
+	commentID, err := rt.db.GetExistComment(messageID, conversationID, userID)
 	if err != nil {
 		InternalServerError(w, err, "Internal Server Error", ctx)
 		return
 	}
+
+	// if exist update comment
+	if commentID != 0 {
+		err = rt.db.UpdateComment(commentID, comment.CommentTXT)
+		if err != nil {
+			InternalServerError(w, err, "Internal Server Error", ctx)
+			return
+		}
+
+	} else {
+		// else create comment
+		comment, err = rt.CreateCommentDB(comment)
+		if err != nil {
+			InternalServerError(w, err, "Internal Server Error", ctx)
+			return
+		}
+	}
+
+	comment.CommentID = commentID
 
 	// response
 	w.Header().Set("Content-Type", "application/json")

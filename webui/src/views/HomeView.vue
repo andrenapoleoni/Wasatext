@@ -17,6 +17,7 @@ export default {
       groupChatMembers: [],
       showPrivateChatModal: false,
       showDropdown: false,
+      intervalId: null,
 
     };
   },
@@ -86,6 +87,11 @@ export default {
     }
     this.getMyconversations();
     document.addEventListener("click", this.closeDropdown);
+    this.intervalId = setInterval(async () => {
+      clearInterval(this.intervalId);
+      await this.getMyconversations();
+      this.intervalId = setInterval(this.getMyconversations, 5000);
+    }, 5000);
   },
   beforeUnmount() {
     document.removeEventListener("click", this.closeDropdown);

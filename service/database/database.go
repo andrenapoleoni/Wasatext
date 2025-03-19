@@ -106,7 +106,11 @@ type AppDatabase interface {
 
 	ExistConversationByID(conversationID int) (bool, error)
 
-	GetComments(messageID int) ([]Comment, error)
+	GetComments(messageID int, conversationID int) ([]Comment, error)
+
+	GetExistComment(messageID int, conversationID int, userID int) (int, error)
+
+	UpdateComment(commentID int, commentTXT string) error
 
 	Ping() error
 }

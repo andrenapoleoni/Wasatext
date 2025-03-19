@@ -94,6 +94,7 @@ export default{
           this.groupMembers = response.data.memberlist;
           console.log("Messages:", this.messages);
           console.log("username:", this.userToSend);
+          console.log("convid", this.convID);
         }
       } catch (e) {
         alert("Error fetching conversation: " + e.toString());
@@ -223,7 +224,20 @@ export default{
     this.convID = this.$route.params.conversation;
     console.log("Conversation ID:", this.convID);
     this.getConversation();
+    this.intervalId = setInterval(async () => {
+        clearInterval(this.intervalId);
+        await this.getConversation();
+        this.intervalId = setInterval(this.getConversation, 5000);
+      }, 5000);
+    },
     
+  
+  beforeunmount() {
+    // ripulisci tutti i dati
+    this.messages = [];
+    this.newMessage = "";
+
+    this.convID = "null";
   },
 
   components: {Reaction}
@@ -295,7 +309,7 @@ export default{
     {{ msg.message.txt }}
     <div v-if="msg.comment && msg.comment.length">
       <div v-for="comment in msg.comment" :key="comment.username">
-  {{ comment.commentTXT }} - {{ comment.username }}
+  {{ comment.commentTXT }} - {{ comment.username === owner ? 'Tu' : comment.username }}
 </div>
 </div>
      
